@@ -1,5 +1,7 @@
 # Cats and Dogs Example
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/idealo/imageatm/blob/master/examples/imageatm_cats_and_dogs.ipynb)
+
 ### Install imageatm via PyPi
 ```python
 !pip install imageatm
