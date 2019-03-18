@@ -4,9 +4,6 @@ site_author: idealo Data Science Team
 nav:
     - Home: index.md
     - Getting Started: start.md
-    - Examples:
-      - Cats and Dogs: examples/cats_and_dogs.md
-      - Imagenette: examples/imagenette.md
     - Documentation:
         - Client:
             - Client: client/client.md
@@ -20,10 +17,6 @@ nav:
         - Handlers:
             - Data Generator: handlers/data_generator.md
             - Image Classifer: handlers/image_classifier.md
-            - Images: handlers/images.md
-            - Logger: handlers/logger.md
-            - Keras Utils: handlers/keras_utils.md
-            - Utils: handlers/utils.md
         - Scripts:
             - Run Cloud: scripts/run_cloud.md
             - Run Data Prep: scripts/run_data_prep.md

@@ -4,17 +4,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 plt.style.use('ggplot')
-from typing import List
 from typing import List, Union, Tuple, Any
 from pathlib import Path
-from imageatm.handlers.images import load_image
-from imageatm.handlers.image_classifier import ImageClassifier
-from imageatm.handlers.data_generator import ValDataGenerator
-from imageatm.handlers.utils import load_json
-from imageatm.handlers.keras_utils import use_multiprocessing, load_model
-from imageatm.handlers.logger import get_logger
 from sklearn.metrics import confusion_matrix, accuracy_score, classification_report
 from vis.visualization import visualize_cam
+from imageatm.handlers.image_classifier import ImageClassifier
+from imageatm.handlers.data_generator import ValDataGenerator
+from imageatm.utils.io import load_json
+from imageatm.utils.images import load_image
+from imageatm.utils.logger import get_logger
+from imageatm.utils.tf_keras import use_multiprocessing, load_model
+
 
 BATCH_SIZE = 16
 BASE_MODEL_NAME = 'MobileNet'

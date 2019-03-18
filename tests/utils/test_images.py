@@ -1,5 +1,5 @@
 from pathlib import Path
-from imageatm.handlers import images as im
+from imageatm.utils import images as im
 
 p = Path(__file__)
 

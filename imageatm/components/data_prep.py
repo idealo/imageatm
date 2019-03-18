@@ -3,9 +3,10 @@ from typing import Counter as Counter_type
 from typing import Optional, List, Callable
 from collections import Counter
 from pathlib import Path
-from imageatm.handlers.images import resize_image_mp, validate_image
-from imageatm.handlers.utils import load_json, save_json, parallelise
-from imageatm.handlers.logger import get_logger
+from imageatm.utils.images import resize_image_mp, validate_image
+from imageatm.utils.io import load_json, save_json
+from imageatm.utils.process import parallelise
+from imageatm.utils.logger import get_logger
 from sklearn.model_selection import train_test_split
 
 

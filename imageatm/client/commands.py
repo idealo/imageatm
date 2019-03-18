@@ -1,7 +1,7 @@
 import os
 from typing import Optional
 from pathlib import Path
-from imageatm.handlers.logger import get_logger
+from imageatm.utils.logger import get_logger
 from imageatm.client.config import (
     Config,
     validate_config,

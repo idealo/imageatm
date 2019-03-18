@@ -2,8 +2,8 @@ import os
 import time
 from pathlib import Path
 from typing import Optional
-from imageatm.handlers.utils import run_cmd
-from imageatm.handlers.logger import get_logger
+from imageatm.utils.process import run_cmd
+from imageatm.utils.logger import get_logger
 
 
 class AWS:

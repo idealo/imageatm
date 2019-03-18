@@ -1,7 +1,7 @@
 import numpy as np
 from typing import List, Callable, Tuple
 from pathlib import Path
-from imageatm.handlers.images import load_image, random_crop
+from imageatm.utils.images import load_image, random_crop
 from keras.utils import Sequence, to_categorical
 
 

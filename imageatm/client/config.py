@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Optional, List
-from imageatm.handlers.utils import load_yaml
+from imageatm.utils.io import load_yaml
 
 
 class Config:

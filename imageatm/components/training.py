@@ -1,14 +1,14 @@
 import os
 import typing
 import tensorflow as tf
-from imageatm.handlers.data_generator import TrainDataGenerator, ValDataGenerator
-from imageatm.handlers.image_classifier import ImageClassifier
-from imageatm.handlers.utils import load_json
-from imageatm.handlers.keras_utils import use_multiprocessing, LoggingMetrics, LoggingModels
-from imageatm.handlers.logger import get_logger
 from keras import backend as K
 from keras.callbacks import ReduceLROnPlateau, EarlyStopping
 from pathlib import Path
+from imageatm.utils.io import load_json
+from imageatm.utils.logger import get_logger
+from imageatm.utils.tf_keras import use_multiprocessing, LoggingMetrics, LoggingModels
+from imageatm.handlers.data_generator import TrainDataGenerator, ValDataGenerator
+from imageatm.handlers.image_classifier import ImageClassifier
 
 
 tf.logging.set_verbosity(tf.logging.ERROR)

@@ -4,7 +4,7 @@ import numpy.testing as npt
 from collections import Counter
 from pathlib import Path
 from imageatm.components.data_prep import DataPrep
-from imageatm.handlers.utils import load_json
+from imageatm.utils.io import load_json
 
 p = Path(__file__)
 """Files for test_valid_images."""
@@ -40,7 +40,7 @@ class TestDataPrep(object):
     dp = None
 
     def test__init(self, mocker):
-        mocker.patch('imageatm.handlers.utils.load_json', return_value={})
+        mocker.patch('imageatm.utils.io.load_json', return_value={})
         global dp
         dp = DataPrep(image_dir=TEST_IMG_DIR, job_dir=TEST_JOB_DIR, samples_file=TEST_STR_FILE)
 
@@ -121,10 +121,7 @@ class TestDataPrep(object):
     def test__create_class_mapping(self):
         global dp
         dp.samples = load_json(TEST_STR_FILE)
-        dp.samples_count = {
-            'left': 3,
-            'right': 1
-        }
+        dp.samples_count = {'left': 3, 'right': 1}
         dp._create_class_mapping()
         expected = {0: 'left', 1: 'right'}
         assert dp.class_mapping == expected
@@ -135,10 +132,7 @@ class TestDataPrep(object):
         assert dp.class_mapping == expected
 
         dp.samples = load_json(TEST_INT_FILE)
-        dp.samples_count = {
-            1: 10,
-            2: 20
-        }
+        dp.samples_count = {1: 10, 2: 20}
         dp._create_class_mapping()
         print(dp.class_mapping)
         expected = {0: 1, 1: 2}
@@ -152,10 +146,7 @@ class TestDataPrep(object):
     def test__apply_class_mapping(self):
         global dp
         dp.samples = load_json(TEST_STR_FILE)
-        dp.class_mapping = {
-            0: 'left',
-            1: 'right'
-        }
+        dp.class_mapping = {0: 'left', 1: 'right'}
         dp._apply_class_mapping()
         expected = load_json(TEST_FILE_STR2INT)
 
