@@ -282,3 +282,47 @@ class Evaluation:
         if len(image_list) == 0:
             print('Empty list.')
             return
+        else:
+            n_rows = min(n_plot, len(image_list))
+            n_cols = 2 if show_heatmap else 1
+
+            figsize = [5 * n_cols, 5 * n_rows]
+            plt.figure(figsize=figsize)
+
+            plot_count = 1
+            for (i, img, sample) in image_list[:n_rows]:
+                plt.subplot(n_rows, n_cols, plot_count)
+                plt.imshow(img)
+                plt.axis('off')
+                plt.title(
+                    'true: {}, predicted: {} ({})'.format(
+                        self.class_mapping[str(self.y_true[i])],
+                        self.class_mapping[str(self.y_pred[i])],
+                        str(round(self.y_pred_prob[i], 2)),
+                    )
+                )
+                plot_count += 1
+
+                if show_heatmap is True:
+                    heatmap = visualize_cam(
+                        model=self.classifier.model,
+                        layer_idx=89,
+                        filter_indices=[self.y_pred[i]],
+                        seed_input=self.classifier.get_preprocess_input()(
+                            np.array(img).astype(np.float32)
+                        ),
+                    )
+                    plt.subplot(n_rows, n_cols, plot_count)
+                    plt.imshow(img)
+                    plt.imshow(heatmap, alpha=0.7)
+                    plt.axis('off')
+                    plot_count += 1
+
+        if self.save_plots:
+            # TODO: pass name as argument
+            target_file = self.evaluation_dir / 'misclassified_images.pdf'
+            plt.savefig(target_file)
+            self.logger.info('saved under {}'.format(target_file))
+
+        if self.show_plots:
+            plt.show()
