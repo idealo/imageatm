@@ -1,0 +1,28 @@
+data_prep:
+  run: False
+  samples_file: test_data_prep/samples.json
+  image_dir: test_data_prep/images
+  job_dir: test_data_prep/job_dir
+  resize: True
+
+train:
+  run: True
+  cloud: True
+  image_dir: test_train/images
+  job_dir: test_train/job_dir
+
+evaluate:
+  run: False
+  image_dir: test_evaluate/images
+  job_dir: test_evaluate/job_dir
+
+cloud:
+  run: False
+  provider: aws  # supported providers ['aws']
+  tf_dir: cloud/aws
+  region: eu-west-1  # supported regions ['eu-west-1', 'eu-central-1']
+  vpc_id: abc
+  instance_type: t2.micro  # supported instances ['p2.xlarge']
+  bucket: s3://test_bucket  # s3 bucket needs to exist, will not be created/destroyed by terraform
+  destroy: True
+  cloud_tag: test_user

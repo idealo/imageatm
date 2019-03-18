@@ -1,0 +1,26 @@
+[
+    {
+        "image_id": "helmet_3.jpg",
+        "blabla": "left"
+    },
+    {
+        "blabla": "helmet_1.jpg",
+        "label": "right"
+    },
+    {
+        "image_id": "truncated.jpg",
+        "label": "left"
+    },
+    {
+        "image_id": "helmet_1.jpg",
+        "label": "left"
+    },
+    {
+        "image_id": "helmet_2.jpg",
+        "label": "left"
+    },
+    {
+        "image_id": "image_png.png",
+        "label": "right"
+    }
+]

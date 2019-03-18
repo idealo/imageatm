@@ -1,0 +1,122 @@
+[
+  {
+    "image_id": "1.jpg",
+    "label": 2
+  },
+  {
+    "image_id": "2.jpg",
+    "label": 1
+  },
+  {
+    "image_id": "3.jpg",
+    "label": 1
+  },
+  {
+    "image_id": "4.jpg",
+    "label": 2
+  },
+  {
+    "image_id": "5.jpg",
+    "label": 1
+  },
+  {
+    "image_id": "6.jpg",
+    "label": 1
+  },
+  {
+    "image_id": "7.jpg",
+    "label": 2
+  },
+  {
+    "image_id": "8.jpg",
+    "label": 1
+  },
+  {
+    "image_id": "9.jpg",
+    "label": 1
+  },
+  {
+    "image_id": "10.jpg",
+    "label": 2
+  },
+  {
+    "image_id": "11.jpg",
+    "label": 1
+  },
+  {
+    "image_id": "12.jpg",
+    "label": 1
+  },
+  {
+    "image_id": "13.jpg",
+    "label": 1
+  },
+  {
+    "image_id": "14.jpg",
+    "label": 2
+  },
+  {
+    "image_id": "15.jpg",
+    "label": 1
+  },
+  {
+    "image_id": "16.jpg",
+    "label": 1
+  },
+  {
+    "image_id": "17.jpg",
+    "label": 2
+  },
+  {
+    "image_id": "18.jpg",
+    "label": 1
+  },
+  {
+    "image_id": "19.jpg",
+    "label": 1
+  },
+  {
+    "image_id": "20.jpg",
+    "label": 2
+  },
+  {
+    "image_id": "21.jpg",
+    "label": 2
+  },
+  {
+    "image_id": "22.jpg",
+    "label": 1
+  },
+  {
+    "image_id": "23.jpg",
+    "label": 1
+  },
+  {
+    "image_id": "24.jpg",
+    "label": 2
+  },
+  {
+    "image_id": "25.jpg",
+    "label": 1
+  },
+  {
+    "image_id": "26.jpg",
+    "label": 1
+  },
+  {
+    "image_id": "27.jpg",
+    "label": 2
+  },
+  {
+    "image_id": "28.jpg",
+    "label": 1
+  },
+  {
+    "image_id": "29.jpg",
+    "label": 1
+  },
+  {
+    "image_id": "30.jpg",
+    "label": 1
+  }
+]
