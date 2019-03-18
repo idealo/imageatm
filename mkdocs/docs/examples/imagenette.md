@@ -4,21 +4,21 @@
 
 ### Install imageatm via PyPi
 ```python
-!pip install imageatm
+pip install imageatm
 ```
 
 ### Download the [Imagenette dataset (320px)](https://github.com/fastai/imagenette) and ImageNet mapping
 ```bash
-!wget --no-check-certificate \
+wget --no-check-certificate \
     https://s3.amazonaws.com/fast-ai-imageclas/imagenette-320.tgz
     
-!wget --no-check-certificate \
+wget --no-check-certificate \
   https://raw.githubusercontent.com/ozendelait/wordnet-to-json/master/mapping_imagenet.json
 ```
 
 ### Untar the dataset
 ```bash
-!tar -xzf imagenette-320.tgz
+tar -xzf imagenette-320.tgz
 ```
 
 ### Create mapping for Imagenette classes and prepare the data.json

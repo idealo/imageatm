@@ -4,22 +4,22 @@
 
 ### Install imageatm via PyPi
 ```python
-!pip install imageatm
+pip install imageatm
 ```
 
 ### Download the cats and dogs dataset
 ```bash
-!wget --no-check-certificate \
+wget --no-check-certificate \
     https://storage.googleapis.com/mledu-datasets/cats_and_dogs_filtered.zip \
     -O cats_and_dogs_filtered.zip
 ```
 
 ### Unzip dataset and create working directory
 ```bash
-!unzip cats_and_dogs_filtered.zip
-!mkdir -p cats_and_dogs/train
-!mv cats_and_dogs_filtered/train/cats/* cats_and_dogs/train
-!mv cats_and_dogs_filtered/train/dogs/* cats_and_dogs/train
+unzip cats_and_dogs_filtered.zip
+mkdir -p cats_and_dogs/train
+mv cats_and_dogs_filtered/train/cats/* cats_and_dogs/train
+mv cats_and_dogs_filtered/train/dogs/* cats_and_dogs/train
 ```
 
 ### Create the sample file
