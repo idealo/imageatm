@@ -164,9 +164,9 @@ dmypy.json
 .idea/
 mkdocs/docs/client/
 mkdocs/docs/components/
-mkdocs/docs/handlers
+mkdocs/docs/handlers/
 mkdocs/docs/scripts/
 mkdocs/docs/index.md
 mkdocs/docs/CONTRIBUTING.md
 mkdocs/docs/LICENSE.md
-docs/
+/docs

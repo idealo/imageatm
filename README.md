@@ -7,7 +7,7 @@ Image ATM is a one-click tool that automates the workflow of a typical image cla
 - Training
 - Model evaluation
 
-Read the documentation at: https://idealo.github.io/imageatm/
+Read the documentation at: [https://idealo.github.io/imageatm/](https://idealo.github.io/imageatm/)
 
 Image ATM is compatible with Python 3.6 and is distributed under the Apache 2.0 license.
 

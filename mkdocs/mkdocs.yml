@@ -31,6 +31,11 @@ nav:
     - License: LICENSE.md
 theme:
   name: 'material'
+  palette:
+    primary: 'red'
+    accent: 'red'
+  logo: 'img/logo.svg'
+  favicon: 'img/favicon.ico'
 
 markdown_extensions:
   - codehilite
