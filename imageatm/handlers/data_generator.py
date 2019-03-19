@@ -6,7 +6,21 @@ from keras.utils import Sequence, to_categorical
 
 
 class DataGenerator(Sequence):
-    """Inherits from Keras Sequence base object, allows to use multiprocessing in .fit_generator."""
+    """Class inherits from Keras Sequence base object, allows to use multiprocessing in .fit_generator.
+
+    DataGenerator is extended by these classes:
+        TrainDataGenerator
+        ValDataGenerator.
+
+    Attributes:
+        samples: Dictionary of samples to generate data from.
+        image_dir: Path of image directory.
+        batch_size: Number of images per batch.
+        n_classes: Number of classes in dataset.
+        basenet_preprocess: Basenet specific preprocessing function.
+        img_load_dims: Dimensions that images get resized into when loaded.
+        train: If set to True samples are shuffled before each epoch and images are cropped once.
+    """
 
     def __init__(
         self,
@@ -22,10 +36,10 @@ class DataGenerator(Sequence):
         self.image_dir = Path(image_dir)
         self.batch_size = batch_size
         self.n_classes = n_classes
-        self.basenet_preprocess = basenet_preprocess  # basenet specific preprocessing function
-        self.img_load_dims = img_load_dims  # dimensions that images get resized into when loaded
+        self.basenet_preprocess = basenet_preprocess
+        self.img_load_dims = img_load_dims
         self.train = train
-        self.on_epoch_end()  # call ensures that samples are shuffled in first epoch if shuffle is set to True
+        self.on_epoch_end()
 
     def on_epoch_end(self):
         self.indexes = np.arange(len(self.samples))
@@ -33,18 +47,19 @@ class DataGenerator(Sequence):
             np.random.shuffle(self.indexes)
 
     def __len__(self):
-        return int(np.ceil(len(self.samples) / self.batch_size))  # number of batches per epoch
+        """Number of batches in the Sequence."""
+        return int(np.ceil(len(self.samples) / self.batch_size))
 
     def __getitem__(self, index: int) -> Tuple[np.array, np.array]:
-        batch_indexes = self.indexes[
-            index * self.batch_size : (index + 1) * self.batch_size
-        ]  # get batch indexes
-        batch_samples = [self.samples[i] for i in batch_indexes]  # get batch samples
-        X, y = self.data_generator(batch_samples)
+        """Gets batch at position `index`."""
+        batch_indexes = self.indexes[index * self.batch_size : (index + 1) * self.batch_size]
+        batch_samples = [self.samples[i] for i in batch_indexes]
+        X, y = self._data_generator(batch_samples)
         return X, y
 
-    def data_generator(self, batch_samples: List[dict]) -> Tuple[np.array, np.array]:
-        # initialize images and labels tensors for faster processing
+    def _data_generator(self, batch_samples: List[dict]) -> Tuple[np.array, np.array]:
+        """Generates data from samples in specified batch."""
+        #  initialize images and labels tensors for faster processing
         dims = self.img_crop_dims if self.train == True else self.img_load_dims
         X = np.empty((len(batch_samples), *dims, 3))
         y = np.empty((len(batch_samples), self.n_classes))
@@ -68,6 +83,21 @@ class DataGenerator(Sequence):
 
 
 class TrainDataGenerator(DataGenerator):
+    """Class inherits from DataGenerator.
+
+    Per default neither images are cropped nor samples are shuffled.
+
+    Attributes:
+        samples: Dictionary of samples to generate data from.
+        image_dir: Path of image directory.
+        batch_size: Number of images per batch.
+        n_classes: Number of classes in dataset.
+        basenet_preprocess: Basenet specific preprocessing function.
+        img_load_dims: Dimensions that images get resized into when loaded (default (256, 256)).
+        img_crop_dims: Dimensions that images get resized into when loaded (default (224, 224)).
+        train: If set to True samples are shuffled before each epoch and images are cropped once (default True).
+    """
+
     def __init__(
         self,
         samples: List[dict],
@@ -86,6 +116,21 @@ class TrainDataGenerator(DataGenerator):
 
 
 class ValDataGenerator(DataGenerator):
+    """Class inherits from DataGenerator.
+
+    Per default images are cropped on init and samples are shuffled before each epoch.
+
+    Attributes:
+        samples: Dictionary of samples to generate data from.
+        image_dir: Path of image directory.
+        batch_size: Number of images per batch.
+        n_classes: Number of classes in dataset.
+        basenet_preprocess: Basenet specific preprocessing function.
+        img_load_dims: Dimensions that images get resized into when loaded (default (224, 224)).
+        train: If set to True samples are shuffled before each epoch and images are cropped once (default False).
+
+    """
+
     def __init__(
         self,
         samples: List[dict],
