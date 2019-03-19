@@ -1,7 +1,11 @@
 import pytest
 import shutil
+import numpy.testing as npt
 from pathlib import Path
 from imageatm.components.evaluation import Evaluation
+from imageatm.handlers.image_classifier import ImageClassifier
+from imageatm.handlers.data_generator import ValDataGenerator
+
 
 TEST_IMAGE_DIR = Path('./tests/data/test_images').resolve()
 TEST_JOB_DIR = Path('./tests/data/test_train_job').resolve()
@@ -23,7 +27,6 @@ def tear_down(request):
 
 class TestEvaluation(object):
     eval = None
-
 
     def test__init__(self, mocker):
         mocker.patch('imageatm.components.evaluation.load_model', return_value={})
@@ -119,7 +122,6 @@ class TestEvaluation(object):
         mock_plt_figure.assert_called()
         mock_plt_imshow.assert_called()
         mock_plt_title.assert_called_with('Confusion matrix', fontsize=16)
-        mock_plt_imshow.assert_called()
         mock_plt_colorbar.assert_called()
         mock_plt_xticks.assert_called()
         mock_plt_yticks.assert_called()
@@ -132,6 +134,7 @@ class TestEvaluation(object):
         def paramized_test_correct_wrong_function(y_pred, label, num_correct, num_wrong):
             global eval
             eval.y_pred = y_pred
+            eval.class_mapping = {0: '0', 1: '1'}
             correct, wrong = eval.get_correct_wrong_examples(label)
             assert len(correct) == num_correct
             assert len(wrong) == num_wrong
@@ -140,10 +143,8 @@ class TestEvaluation(object):
         paramized_test_correct_wrong_function([0, 0, 0, 1], 1, 1, 0)
         paramized_test_correct_wrong_function([1, 0, 0, 0], 0, 2, 1)
         paramized_test_correct_wrong_function([1, 0, 0, 0], 1, 0, 1)
-
-    def test_visualize_images_empty_image_list(self):
-        global eval
-        assert eval.visualize_images(image_list=[]) is None
+        paramized_test_correct_wrong_function([0, 0, 0, 1], '0', 3, 0)
+        paramized_test_correct_wrong_function([0, 0, 0, 1], '1', 1, 0)
 
     def test__get_probabilities_prediction(self):
         global eval
@@ -153,3 +154,137 @@ class TestEvaluation(object):
             0.8,
             0.7,
         ]
+
+    def test__make_prediction_on_test_set(self, mocker):
+        mocker.patch(
+            'imageatm.handlers.image_classifier.ImageClassifier.__init__', return_value=None
+        )
+        mocker.patch(
+            'imageatm.handlers.data_generator.ValDataGenerator.__init__', return_value=None
+        )
+        mocker.patch('imageatm.handlers.image_classifier.ImageClassifier.get_preprocess_input')
+        mocker.patch.object(
+            ImageClassifier, 'predict_generator', return_value=[[0.3, 0.85], [0.7, 0.2], [0.5, 0.3]]
+        )
+        mp_proba = mocker.patch(
+            'imageatm.components.evaluation.Evaluation._get_probabilities_prediction'
+        )
+
+        global eval
+        eval._make_prediction_on_test_set()
+
+        npt.assert_array_equal(eval.y_pred, [1, 0, 0])
+        mp_proba.assert_called_with(predictions_dist=[[0.3, 0.85], [0.7, 0.2], [0.5, 0.3]])
+
+    def test__calc_classification_report(self, mocker):
+        mp_cr = mocker.patch('imageatm.components.evaluation.classification_report')
+
+        global eval
+
+        eval.y_pred = [0, 1, 1, 0]
+        eval.y_true = [1, 1, 1, 0]
+        eval.classes = ['0', '1']
+        eval._calc_classification_report()
+        assert eval.accuracy == 0.75
+        mp_cr.assert_called_with(y_true=eval.y_true, y_pred=eval.y_pred, target_names=eval.classes)
+
+        eval.y_pred = [0, 1, 1, 0]
+        eval.y_true = [1, 1, 1, 1]
+
+        eval._calc_classification_report()
+        assert eval.accuracy != 0.75
+
+    def test_visualize_images_empty_image_list(self, mocker):
+        mock_plt_title = mocker.patch('matplotlib.pyplot.title')
+        mock_plt_figure = mocker.patch('matplotlib.pyplot.figure')
+        mock_plt_imshow = mocker.patch('matplotlib.pyplot.imshow')
+        mock_plt_show = mocker.patch('matplotlib.pyplot.show')
+        mock_plt_subplot = mocker.patch('matplotlib.pyplot.subplot')
+        mock_plt_axis = mocker.patch('matplotlib.pyplot.axis')
+        mock_plt_savefig = mocker.patch('matplotlib.pyplot.savefig')
+
+        global eval
+        assert eval.visualize_images(image_list=[]) is None
+        mock_plt_title.assert_not_called()
+        mock_plt_figure.assert_not_called()
+        mock_plt_imshow.assert_not_called()
+        mock_plt_show.assert_not_called()
+        mock_plt_subplot.assert_not_called()
+        mock_plt_axis.assert_not_called()
+        mock_plt_savefig.assert_not_called()
+
+    def test_visualize_images_1(self, mocker):
+        mock_plt_title = mocker.patch('matplotlib.pyplot.title')
+        mock_plt_figure = mocker.patch('matplotlib.pyplot.figure')
+        mock_plt_imshow = mocker.patch('matplotlib.pyplot.imshow')
+        mock_plt_subplot = mocker.patch('matplotlib.pyplot.subplot')
+        mock_plt_axis = mocker.patch('matplotlib.pyplot.axis')
+        mock_plt_savefig = mocker.patch('matplotlib.pyplot.savefig')
+        mock_plt_show = mocker.patch('matplotlib.pyplot.show')
+
+        global eval
+        eval.save_plots = False
+        eval.show_plots = True
+        eval.class_mapping = {'0': 0, '1': 1}
+        eval.y_true = [0, 0, 0, 1]
+        eval.y_pred = [1, 0, 0, 0]
+        eval.y_pred_prob = [0.9, 0.8, 0.7, 0.8]
+        correct, wrong = eval.get_correct_wrong_examples(0)
+
+        eval.visualize_images(correct, show_heatmap=False)
+        mock_plt_title.call_count == 3
+        mock_plt_figure.call_count == 3
+        mock_plt_imshow.call_count == 3
+        mock_plt_subplot.call_count == 3
+        mock_plt_axis.call_count == 3
+        mock_plt_savefig.assert_not_called()
+        mock_plt_show.assert_called_once()
+
+    def test_visualize_images_2(self, mocker):
+        mock_plt_title = mocker.patch('matplotlib.pyplot.title')
+        mock_plt_figure = mocker.patch('matplotlib.pyplot.figure')
+        mock_plt_imshow = mocker.patch('matplotlib.pyplot.imshow')
+        mock_plt_subplot = mocker.patch('matplotlib.pyplot.subplot')
+        mock_plt_axis = mocker.patch('matplotlib.pyplot.axis')
+        mock_plt_savefig = mocker.patch('matplotlib.pyplot.savefig')
+        mock_plt_show = mocker.patch('matplotlib.pyplot.show')
+
+        global eval
+        eval.save_plots = True
+        eval.show_plots = False
+        correct, wrong = eval.get_correct_wrong_examples(0)
+
+        eval.visualize_images(correct, show_heatmap=False)
+        mock_plt_title.call_count == 3
+        mock_plt_figure.call_count == 3
+        mock_plt_imshow.call_count == 3
+        mock_plt_subplot.call_count == 3
+        mock_plt_axis.call_count == 3
+        mock_plt_savefig.assert_called_once()
+        mock_plt_show.assert_not_called()
+
+    def test_visualize_images_3(self, mocker):
+        mock_plt_title = mocker.patch('matplotlib.pyplot.title')
+        mock_plt_figure = mocker.patch('matplotlib.pyplot.figure')
+        mock_plt_imshow = mocker.patch('matplotlib.pyplot.imshow')
+        mock_plt_subplot = mocker.patch('matplotlib.pyplot.subplot')
+        mock_plt_axis = mocker.patch('matplotlib.pyplot.axis')
+        mock_plt_savefig = mocker.patch('matplotlib.pyplot.savefig')
+        mock_plt_show = mocker.patch('matplotlib.pyplot.show')
+        mock_vc = mocker.patch('imageatm.components.evaluation.visualize_cam')
+        mocker.patch('imageatm.handlers.image_classifier.ImageClassifier.get_preprocess_input')
+
+        global eval
+        eval.save_plots = True
+        eval.show_plots = False
+        correct, wrong = eval.get_correct_wrong_examples(0)
+
+        eval.visualize_images(correct, show_heatmap=True)
+        mock_vc.call_count == 3
+        mock_plt_title.call_count == 3
+        mock_plt_figure.call_count == 3
+        mock_plt_imshow.call_count == 9
+        mock_plt_subplot.call_count == 3
+        mock_plt_axis.call_count == 6
+        mock_plt_savefig.assert_called_once()
+        mock_plt_show.assert_not_called()
