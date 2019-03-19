@@ -14,18 +14,18 @@ nav:
             - Config: client/config.md
         - Components:
             - Cloud: components/cloud.md
-            - Evaluation: components/evaluation.md
             - Data Preparation: components/data_prep.md
             - Training: components/training.md
+            - Evaluation: components/evaluation.md
         - Handlers:
             - Data Generator: handlers/data_generator.md
             - Image Classifer: handlers/image_classifier.md
         - Scripts:
             - Run Cloud: scripts/run_cloud.md
             - Run Data Prep: scripts/run_data_prep.md
-            - Run Evaluation: scripts/run_evaluation.md
-            - Run Training Cloud: scripts/run_training_cloud.md
             - Run Training: scripts/run_training.md
+            - Run Training Cloud: scripts/run_training_cloud.md
+            - Run Evaluation: scripts/run_evaluation.md
     - Contribution: CONTRIBUTING.md
     - License: LICENSE.md
 theme:

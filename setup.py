@@ -1,7 +1,8 @@
 from setuptools import setup, find_packages
 
 long_description = '''
-Image ATM is a one-click tool that automates the workflow of a typical image classification pipeline in an opinionated way, this includes:
+Image ATM is a one-click tool that automates the workflow of a typical
+image classification pipeline in an opinionated way, this includes:
 
 - Preprocessing and validating input images and labels
 - Starting/terminating cloud instance with GPU support
@@ -15,9 +16,9 @@ Image ATM is compatible with Python 3.6 and is distributed under the Apache 2.0 
 
 setup(
     name='imageatm',
-    version='0.0.3',
+    version='0.0.4',
     author='Christopher Lennan, Malgorzata Adamczyk, Gunar Maiwald, Dat Tran',
-    author_email='datitran@gmail.com',
+    author_email='christopherlennan@gmail.com, m.adamczyk.berlin@gmail.com, gunar.maiwald@web.de, datitran@gmail.com',
     description='Image classification for everyone',
     long_description=long_description,
     license='Apache 2.0',
