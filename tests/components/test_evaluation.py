@@ -4,7 +4,6 @@ import numpy.testing as npt
 from pathlib import Path
 from imageatm.components.evaluation import Evaluation
 from imageatm.handlers.image_classifier import ImageClassifier
-from imageatm.handlers.data_generator import ValDataGenerator
 
 
 TEST_IMAGE_DIR = Path('./tests/data/test_images').resolve()

@@ -21,6 +21,8 @@ TEST_FILE_STR2INT = p.parent / '../data/test_samples' / 'test_int_labels.json'
 
 TEST_IMG_DIR = p.parent / '../data/test_images'
 
+TEST_NO_IMG_DIR = p.parent / '../data/test_no_images'
+
 TEST_SPLIT_FILE = p.parent / '../data/test_samples' / 'test_split.json'
 
 TEST_STR_FILE_CORRUPTED = p.parent / '../data/test_samples' / 'test_str_labels_corrupted.json'
@@ -48,7 +50,7 @@ class TestDataPrep(object):
         assert dp.job_dir == TEST_JOB_DIR
         assert dp.samples_file == TEST_STR_FILE
 
-    def test__validate_images(self):
+    def test__validate_images_1(self):
         expected = [
             'helmet_1.jpg',
             'helmet_10.jpg',
@@ -67,6 +69,28 @@ class TestDataPrep(object):
         dp._validate_images()
 
         assert sorted(dp.valid_image_ids) == expected
+
+    def test__validate_images_2(self, mocker):
+        mp_save_json = mocker.patch('imageatm.components.data_prep.save_json')
+
+        global dp
+        dp.image_dir = TEST_NO_IMG_DIR
+
+        invalid_image_files = []
+        files = [str(i.absolute()) for i in dp.image_dir.glob('*')]
+        files.sort()
+        for file in files:
+            inv_tuple = (
+                str(file),
+                str(OSError("cannot identify image file '{}'".format(str(file)))),
+            )
+            invalid_image_files.append(inv_tuple)
+
+        dp._validate_images()
+
+        mp_save_json.assert_called_with(
+            invalid_image_files, dp.job_dir / 'invalid_image_files.json'
+        )
 
     def test__validate_sample(self):
         global dp
