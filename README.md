@@ -1,5 +1,8 @@
 # Image ATM (Automated Tagging Machine)
 
+[![Build Status](https://travis-ci.org/idealo/imageatm.svg?branch=master)](https://travis-ci.org/idealo/imageatm)
+[![License](https://img.shields.io/badge/License-Apache%202.0-orange.svg)](https://github.com/idealo/imageatm/blob/master/LICENSE)
+
 Image ATM is a one-click tool that automates the workflow of a typical image classification pipeline in an opinionated way, this includes:
 
 - Preprocessing and validating input images and labels
@@ -77,6 +80,7 @@ Please cite Image ATM in your publications if this is useful for your research. 
 ## Maintainers
 * Christopher Lennan, github: [clennan](https://github.com/clennan)
 * Malgorzata Adamczyk, github: [gosia-malgosia](https://github.com/gosia-malgosia)
+* Gunar Maiwald: github: [gunarmaiwald](https://github.com/gunarmaiwald)
 * Dat Tran, github: [datitran](https://github.com/datitran)
 
 ## Copyright
