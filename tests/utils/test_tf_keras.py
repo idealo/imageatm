@@ -1,6 +1,8 @@
 import logging
 import mock
 import os
+import pytest
+import shutil
 import numpy as np
 from keras.layers import Dense
 from keras.models import Sequential
@@ -15,7 +17,18 @@ batch_size = 5
 train_samples = 20
 test_samples = 20
 
-TEST_DIR = os.path.abspath('tests/data/test_callbacks/')
+TEST_DIR = 'tests/data/test_callbacks/'
+
+if not os.path.exists(TEST_DIR):
+    os.makedirs(TEST_DIR)
+
+
+@pytest.fixture(scope='session', autouse=True)
+def tear_down(request):
+    def remove_job_dir():
+        shutil.rmtree(TEST_DIR)
+
+    request.addfinalizer(remove_job_dir)
 
 
 class TestTfKeras(object):
