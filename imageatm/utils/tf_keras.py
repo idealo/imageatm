@@ -75,7 +75,7 @@ class LoggingModels(Callback):
 
         if mode not in ['auto', 'min', 'max']:
             self.logger.warning(
-                'ModelCheckpoint mode {} is unknown, ' 'fallback to auto mode.'.format(mode)
+                'ModelCheckpoint mode {} is unknown, fallback to auto mode.'.format(mode)
             )
             mode = 'auto'
 
@@ -103,16 +103,15 @@ class LoggingModels(Callback):
                 current = logs.get(self.monitor)
                 if current is None:
                     self.logger.warning(
-                        'Can save best model only with %s available, ' 'skipping.' % (self.monitor),
-                        RuntimeWarning,
+                        'Can save best model only with {} available, skipping.'.format(self.monitor)
                     )
                 else:
                     if self.monitor_op(current, self.best):
                         if self.verbose > 0:
                             self.logger.info(
-                                '\nEpoch %05d: %s improved from %0.5f to %0.5f,'
-                                ' saving model to %s'
-                                % (epoch + 1, self.monitor, self.best, current, filepath)
+                                '\nEpoch {:05d} {} improved from {:0.5f} to {:0.5f},\nsaving model to {}'.format(
+                                    epoch + 1, self.monitor, self.best, current, filepath
+                                )
                             )
                         self.best = current
                         if self.save_weights_only:
@@ -122,12 +121,15 @@ class LoggingModels(Callback):
                     else:
                         if self.verbose > 0:
                             self.logger.info(
-                                '\nEpoch %05d: %s did not improve from %0.5f'
-                                % (epoch + 1, self.monitor, self.best)
+                                '\nEpoch {:05d} {} did not improve from {:0.5f}'.format(
+                                    epoch + 1, self.monitor, self.best
+                                )
                             )
             else:
                 if self.verbose > 0:
-                    self.logger.debug('\nEpoch %05d: saving model to %s' % (epoch + 1, filepath))
+                    self.logger.debug(
+                        '\nEpoch {:05d} saving model to {}'.format(epoch + 1, filepath)
+                    )
                 if self.save_weights_only:
                     self.model.save_weights(filepath, overwrite=True)
                 else:
