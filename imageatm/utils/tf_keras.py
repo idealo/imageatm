@@ -75,8 +75,7 @@ class LoggingModels(Callback):
 
         if mode not in ['auto', 'min', 'max']:
             self.logger.warning(
-                'ModelCheckpoint mode %s is unknown, ' 'fallback to auto mode.' % (mode),
-                RuntimeWarning,
+                'ModelCheckpoint mode {} is unknown, ' 'fallback to auto mode.'.format(mode)
             )
             mode = 'auto'
 
