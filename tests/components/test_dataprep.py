@@ -2,6 +2,7 @@ import shutil
 import pytest
 import numpy.testing as npt
 from collections import Counter
+from mock import call
 from pathlib import Path
 from imageatm.components.data_prep import DataPrep
 from imageatm.utils.io import load_json
@@ -117,7 +118,7 @@ class TestDataPrep(object):
         result = dp._validate_sample(sample, valid_image_ids)
         assert result == False
 
-    def test__validate_samples(self):
+    def test__validate_samples_1(self):
         global dp
         expected = load_json(TEST_STR_FILE)
 
@@ -141,6 +142,37 @@ class TestDataPrep(object):
         dp._validate_samples()
 
         assert dp.samples == expected
+
+    def test__validate_samples_2(self, mocker):
+        mp_logger_info = mocker.patch('logging.Logger.info')
+
+        global dp
+        dp.valid_image_ids = ['1.jpg', '2.jpg', '3.jpg', '4.jpg']
+        dp.samples = load_json(TEST_INT_FILE)
+        dp._validate_samples()
+        calls = [
+            call('\n****** Running samples validation ******\n'),
+            call('The following samples were dropped:'),
+            call("- {'image_id': '5.jpg', 'label': 1}"),
+            call("- {'image_id': '6.jpg', 'label': 1}"),
+            call("- {'image_id': '7.jpg', 'label': 2}"),
+            call("- {'image_id': '8.jpg', 'label': 1}"),
+            call("- {'image_id': '9.jpg', 'label': 1}"),
+            call("- {'image_id': '10.jpg', 'label': 2}"),
+            call("- {'image_id': '11.jpg', 'label': 1}"),
+            call("- {'image_id': '12.jpg', 'label': 1}"),
+            call("- {'image_id': '13.jpg', 'label': 1}"),
+            call("- {'image_id': '14.jpg', 'label': 2}"),
+            call(
+                'NOTE: 26 samples were identified as invalid.\n'
+                'The full list of invalid samples will be saved in job dir.\n'
+            ),
+            call('Class distribution after validation:'),
+            call('1: 2 (50.0%)'),
+            call('2: 2 (50.0%)'),
+        ]
+
+        mp_logger_info.assert_has_calls(calls)
 
     def test__create_class_mapping(self):
         global dp
