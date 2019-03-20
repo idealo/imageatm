@@ -370,3 +370,102 @@ class TestDataPrep(object):
         assert train_labels_count[1] == 27
         assert train_labels_count[2] == 16
         assert train_labels_count[3] == 10
+
+    def test_run_1(self, mocker):
+        mp_validate_images = mocker.patch('imageatm.components.data_prep.DataPrep._validate_images')
+        mp_validate_samples = mocker.patch(
+            'imageatm.components.data_prep.DataPrep._validate_samples'
+        )
+        mp_create_class_mapping = mocker.patch(
+            'imageatm.components.data_prep.DataPrep._create_class_mapping'
+        )
+        mp_apply_class_mapping = mocker.patch(
+            'imageatm.components.data_prep.DataPrep._apply_class_mapping'
+        )
+        mp_split_samples = mocker.patch('imageatm.components.data_prep.DataPrep._split_samples')
+        mp_resize_images = mocker.patch('imageatm.components.data_prep.DataPrep._resize_images')
+        mp_save_files = mocker.patch('imageatm.components.data_prep.DataPrep._save_files')
+
+        global dp
+        dp.image_dir == TEST_IMG_DIR
+        dp.job_dir == TEST_JOB_DIR
+        dp.samples_file == TEST_STR_FILE
+
+        dp.run(resize=False)
+
+        mp_validate_images.assert_called_once()
+        mp_validate_samples.assert_called_once()
+        mp_create_class_mapping.assert_called_once()
+        mp_apply_class_mapping.assert_called_once()
+        mp_split_samples.assert_called_once()
+        mp_resize_images.assert_not_called()
+        mp_save_files.assert_called_once()
+
+    def test_run_2(self, mocker):
+        mp_validate_images = mocker.patch('imageatm.components.data_prep.DataPrep._validate_images')
+        mp_validate_samples = mocker.patch(
+            'imageatm.components.data_prep.DataPrep._validate_samples'
+        )
+        mp_create_class_mapping = mocker.patch(
+            'imageatm.components.data_prep.DataPrep._create_class_mapping'
+        )
+        mp_apply_class_mapping = mocker.patch(
+            'imageatm.components.data_prep.DataPrep._apply_class_mapping'
+        )
+        mp_split_samples = mocker.patch('imageatm.components.data_prep.DataPrep._split_samples')
+        mp_resize_images = mocker.patch('imageatm.components.data_prep.DataPrep._resize_images')
+        mp_save_files = mocker.patch('imageatm.components.data_prep.DataPrep._save_files')
+
+        global dp
+        dp.run(resize=True)
+
+        mp_validate_images.assert_called_once()
+        mp_validate_samples.assert_called_once()
+        mp_create_class_mapping.assert_called_once()
+        mp_apply_class_mapping.assert_called_once()
+        mp_split_samples.assert_called_once()
+        mp_resize_images.assert_called_once()
+        mp_save_files.assert_called_once()
+
+    def test__save_files_1(self, mocker):
+        mp_save_json = mocker.patch('imageatm.components.data_prep.save_json')
+
+        global dp
+        dp.job_dir = TEST_JOB_DIR
+
+        dp._save_files()
+
+        calls = [
+            call(dp.train_samples, dp.job_dir / 'train_samples.json'),
+            call(dp.val_samples, dp.job_dir / 'val_samples.json'),
+            call(dp.test_samples, dp.job_dir / 'test_samples.json'),
+            call(dp.class_mapping, dp.job_dir / 'class_mapping.json'),
+        ]
+
+        mp_save_json.assert_has_calls(calls)
+
+    def test__save_files_2(self, mocker):
+        mp_save_json = mocker.patch('imageatm.components.data_prep.save_json')
+        mp_logger_info = mocker.patch('logging.Logger.info')
+
+        global dp
+        dp.job_dir = TEST_JOB_DIR
+        dp.invalid_samples = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+
+        dp._save_files()
+
+        calls = [
+            call(dp.train_samples, dp.job_dir / 'train_samples.json'),
+            call(dp.val_samples, dp.job_dir / 'val_samples.json'),
+            call(dp.test_samples, dp.job_dir / 'test_samples.json'),
+            call(dp.class_mapping, dp.job_dir / 'class_mapping.json'),
+            call(dp.invalid_samples, dp.job_dir / 'invalid_samples.json'),
+        ]
+
+        mp_save_json.assert_has_calls(calls)
+        mp_logger_info.assert_called_with(
+            'NOTE: More than 10 samples were identified as invalid.\n'
+            'The full list of invalid samples has been saved here:\n{}'.format(
+                dp.job_dir / 'invalid_samples.json'
+            )
+        )
