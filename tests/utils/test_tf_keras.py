@@ -183,7 +183,7 @@ class TestTfKeras(object):
             epochs=1,
         )
         assert os.path.isfile(filepath)
-        mp_logger_warning.assert_called()
+        mp_logger_warning.assert_called_once()
         os.remove(filepath)
 
         # case 6
