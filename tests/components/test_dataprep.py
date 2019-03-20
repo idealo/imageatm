@@ -6,6 +6,7 @@ from mock import call
 from pathlib import Path
 from imageatm.components.data_prep import DataPrep
 from imageatm.utils.io import load_json
+from imageatm.utils.images import resize_image_mp
 
 p = Path(__file__)
 """Files for test_valid_images."""
@@ -35,6 +36,7 @@ TEST_JOB_DIR = p.parent / 'test_job_dir'
 def tear_down(request):
     def remove_job_dir():
         shutil.rmtree(TEST_JOB_DIR)
+        shutil.rmtree(p.parent / '../data/test_images_resized')
 
     request.addfinalizer(remove_job_dir)
 
@@ -173,6 +175,25 @@ class TestDataPrep(object):
         ]
 
         mp_logger_info.assert_has_calls(calls)
+
+    def test__validate_samples_3(self):
+        global dp
+
+        dp.min_class_size = 1000
+        dp.valid_image_ids = ['1.jpg', '2.jpg', '3.jpg', '4.jpg']
+
+        with pytest.raises(AssertionError) as excinfo:
+            dp._validate_samples()
+
+        assert 'Program ended. Collect more samples.' in str(excinfo)
+
+        dp.min_class_size = 1
+        dp.valid_image_ids = ['2.jpg', '3.jpg']
+
+        with pytest.raises(AssertionError) as excinfo:
+            dp._validate_samples()
+
+        assert 'Program ended. Only one label in the dataset.' in str(excinfo)
 
     def test__create_class_mapping(self):
         global dp
@@ -469,3 +490,19 @@ class TestDataPrep(object):
                 dp.job_dir / 'invalid_samples.json'
             )
         )
+
+    def test__resize_images(self, mocker):
+        mp_parallelise = mocker.patch('imageatm.components.data_prep.parallelise')
+
+        global dp
+        dp.image_dir = TEST_IMG_DIR
+        dp.job_dir = TEST_JOB_DIR
+        dp.samples_file = TEST_STR_FILE
+        print(dp.image_dir)
+        new_image_dir = '_'.join([str(dp.image_dir), 'resized'])
+        args = [(dp.image_dir, new_image_dir, i['image_id']) for i in dp.samples]
+
+        dp._resize_images()
+
+        mp_parallelise.assert_called_with(resize_image_mp, args)
+        assert str(dp.image_dir) == new_image_dir

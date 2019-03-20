@@ -57,6 +57,6 @@ class TestProcess(object):
 
         with pytest.raises(Exception) as excinfo:
             run_cmd(cmd, logger, level, return_output)
-            mp_debug.assert_not_called()
-            mp_info.assert_not_called()
-            mp_error.assert_called_once()
+        mp_debug.assert_not_called()
+        mp_info.assert_not_called()
+        mp_error.assert_called_once()

@@ -44,7 +44,7 @@ class AWS:
         self.instance_type = instance_type
         self.vpc_id = vpc_id
         self.s3_bucket = s3_bucket  # needed for IAM setup; bucket will not be created by terraform
-        self.job_dir = os.path.abspath(job_dir)
+        self.job_dir = Path(job_dir).resolve()
         self.cloud_tag = cloud_tag
 
         self.image_dir: Optional[str] = None
