@@ -17,7 +17,8 @@ TEST_IMG_DIR = os.path.abspath('./tests/data/test_images')
 @pytest.fixture(scope='session', autouse=True)
 def tear_down(request):
     def remove_log_file():
-        os.remove(os.path.abspath('./tests/data/test_train_job/logs'))
+        if os.path.exists(os.path.abspath('./tests/data/test_train_job/logs')):
+            os.remove(os.path.abspath('./tests/data/test_train_job/logs'))
 
     request.addfinalizer(remove_log_file)
 
