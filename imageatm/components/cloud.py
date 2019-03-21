@@ -44,7 +44,7 @@ class AWS:
         self.instance_type = instance_type
         self.vpc_id = vpc_id
         self.s3_bucket = s3_bucket  # needed for IAM setup; bucket will not be created by terraform
-        self.job_dir = os.path.abspath(job_dir)
+        self.job_dir = Path(job_dir).resolve()
         self.cloud_tag = cloud_tag
 
         self.image_dir: Optional[str] = None
@@ -214,6 +214,9 @@ class AWS:
         self.logger.info('Setting up remote instance...')
         if image_dir is not None:
             self.image_dir = os.path.abspath(image_dir)
+
+        if job_dir is not None:
+            self.job_dir = os.path.abspath(job_dir)
 
         self._sync_local_s3()
         self._sync_s3_remote()
