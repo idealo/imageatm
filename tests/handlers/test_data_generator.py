@@ -16,11 +16,11 @@ TEST_SAMPLES = [
 
 @pytest.fixture(autouse=True)
 def common_patches(mocker):
-    mocker.patch.object(TrainDataGenerator, 'data_generator')
-    TrainDataGenerator.data_generator.return_value = 'X', 'y'
+    mocker.patch.object(TrainDataGenerator, '_data_generator')
+    TrainDataGenerator._data_generator.return_value = 'X', 'y'
 
-    mocker.patch.object(ValDataGenerator, 'data_generator')
-    ValDataGenerator.data_generator.return_value = 'X', 'y'
+    mocker.patch.object(ValDataGenerator, '_data_generator')
+    ValDataGenerator._data_generator.return_value = 'X', 'y'
     # Setting seed for np.random.shuffle in Train-mode
     np.random.seed(10247)
 
@@ -57,7 +57,7 @@ class TestTrainDataGenerator(object):
         global generator
         generator.__getitem__(1)
 
-        generator.data_generator.assert_called_with(
+        generator._data_generator.assert_called_with(
             [{'image_id': 'helmet_2.jpg', 'label': 0}, {'image_id': 'helmet_5.jpg', 'label': 1}]
         )
 
@@ -92,6 +92,6 @@ class TestValDataGenerator(object):
         global generator
         generator.__getitem__(1)
 
-        generator.data_generator.assert_called_with(
+        generator._data_generator.assert_called_with(
             [{'image_id': 'helmet_4.jpg', 'label': 1}, {'image_id': 'helmet_5.jpg', 'label': 1}]
         )

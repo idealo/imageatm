@@ -21,6 +21,7 @@ class DataGenerator(Sequence):
         img_load_dims: Dimensions that images get resized into when loaded.
         train: If set to True samples are shuffled before each epoch and images are cropped once.
     """
+
     def __init__(
         self,
         samples: List[dict],
@@ -51,9 +52,7 @@ class DataGenerator(Sequence):
 
     def __getitem__(self, index: int) -> Tuple[np.array, np.array]:
         """Gets batch at position `index`."""
-        batch_indexes = self.indexes[
-            index * self.batch_size : (index + 1) * self.batch_size
-        ]
+        batch_indexes = self.indexes[index * self.batch_size : (index + 1) * self.batch_size]
         batch_samples = [self.samples[i] for i in batch_indexes]
         X, y = self._data_generator(batch_samples)
         return X, y
@@ -98,6 +97,7 @@ class TrainDataGenerator(DataGenerator):
         img_crop_dims: Dimensions that images get resized into when loaded (default (224, 224)).
         train: If set to True samples are shuffled before each epoch and images are cropped once (default True).
     """
+
     def __init__(
         self,
         samples: List[dict],
@@ -130,6 +130,7 @@ class ValDataGenerator(DataGenerator):
         train: If set to True samples are shuffled before each epoch and images are cropped once (default False).
 
     """
+
     def __init__(
         self,
         samples: List[dict],

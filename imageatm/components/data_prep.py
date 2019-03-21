@@ -121,13 +121,17 @@ class DataPrep:
 
         # validate images, use multiprocessing
         files = [str(i.absolute()) for i in self.image_dir.glob('*')]
+        files.sort()
+
         results = parallelise(validate_image, files)
 
         valid_image_files = [j for i, j in enumerate(files) if results[i][0]]
         self.valid_image_ids = [os.path.basename(i) for i in valid_image_files]
 
         # return list of invalid images to user and save them if there are more than 10
-        invalid_image_files = [(j, results[i][1]) for i, j in enumerate(files) if not results[i][0]]
+        invalid_image_files = [
+            (j, str(results[i][1])) for i, j in enumerate(files) if not results[i][0]
+        ]
 
         if invalid_image_files:
             self.logger.info('The following files are not valid image files:')
@@ -138,7 +142,9 @@ class DataPrep:
                 self.logger.info(
                     (
                         'NOTE: More than 10 files were identified as invalid image files.\n'
-                        'The full list of those files has been saved here:\n{}'.format()
+                        'The full list of those files has been saved here:\n{}'.format(
+                            self.job_dir / 'invalid_image_files.json'
+                        )
                     )
                 )
 
