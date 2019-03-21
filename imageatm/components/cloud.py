@@ -215,6 +215,9 @@ class AWS:
         if image_dir is not None:
             self.image_dir = os.path.abspath(image_dir)
 
+        if job_dir is not None:
+            self.job_dir = os.path.abspath(job_dir)
+
         self._sync_local_s3()
         self._sync_s3_remote()
         self._launch_train_container(**kwargs)
