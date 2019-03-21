@@ -39,6 +39,10 @@ class AWS:
         cloud_tag: str,
         **kwargs
     ) -> None:
+        """Inits cloud component.
+
+        Sets *remote workdir* and ensures that *s3 bucket prefix* is correct.
+        """
         self.tf_dir = tf_dir
         self.region = region
         self.instance_type = instance_type
@@ -191,11 +195,11 @@ class AWS:
         """Runs training on EC2 instance.
 
         The following steps will be performed in sequence:
-            - sync local image and job directory with S3
-            - sync S3 with EC2 instance
-            - launch Docker training container on EC2
-            - sync EC2 with S3
-            - sync S3 with local.
+            - syncs local image and job directory with S3
+            - syncs S3 with EC2 instance
+            - launches Docker training container on EC2
+            - syncs EC2 with S3
+            - syncs S3 with local.
 
         Any of the pre-trained CNNs in Keras can be used.
 

@@ -26,12 +26,13 @@ class ImageClassifier:
 
     Attributes:
         base_model_name: Name of Keras base model.
-        n_classes: Number of classes,
+        n_classes: Number of classes.
         learning_rate: Learning rate for training phase.
         dropout_rate: Fraction set randomly.
         loss: A loss function as one of two parameters to compile the model.
         weights: Pretrained weights the model architecture is loaded with (default imagenet).
     """
+
     def __init__(
         self,
         base_model_name: str,
@@ -41,6 +42,10 @@ class ImageClassifier:
         loss: str,
         weights: str = 'imagenet',
     ) -> None:
+        """Inits ImageClassifier object.
+
+        Loads Keras base_module specified by base_model_name.
+        """
         self.n_classes = n_classes
         self.base_model_name = base_model_name
         self.learning_rate = learning_rate
@@ -78,11 +83,19 @@ class ImageClassifier:
             )
 
     def get_base_layers(self) -> list:
-        """ Returns layers of classifiers' base model """
+        """ Gets layers of classifiers' base model
+
+        Returns:
+            base_layers: list of layers
+        """
         return self.base_model.layers
 
     def get_preprocess_input(self) -> Callable:
-        """ Returns preprocess_input of classifiers' base_module """
+        """ Gets preprocess_input of classifiers' base_module
+
+        Returns:
+            preprocess_input: Callable
+        """
         return self.base_module.preprocess_input
 
     def set_learning_rate(self, learning_rate: float):
@@ -135,7 +148,7 @@ class ImageClassifier:
             callbacks: List of callbacks to apply during training.
 
         Returns:
-            A `History` object.
+            history: A `History` object.
 
         """
         return self.model.fit_generator(**kwargs)
@@ -151,8 +164,7 @@ class ImageClassifier:
             verbose: Verbosity mode.
 
         Returns:
-            A `History` object.
-
+            history: A `History` object.
         """
         return self.model.predict_generator(data_generator, **kwargs)
 

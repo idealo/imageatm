@@ -45,11 +45,10 @@ class Evaluation:
         base_model_name: str = BASE_MODEL_NAME,
         **kwargs
     ) -> None:
-        """Inits Evaluation class with image_dir, job_dir, batch_size, base_model_name.
+        """Inits evaluation component.
 
         Loads the best model from job directory.
         Creates evaluation directory if app was started from commandline.
-
         """
         self.image_dir = Path(image_dir).resolve()
         self.job_dir = Path(job_dir).resolve()
@@ -231,10 +230,10 @@ class Evaluation:
     def run(self):
         """Runs evaluation pipeline on the best model found in job directory for the specific test set:
 
-            - Plot test set distribution
-            - Make prediction on test set
-            - Calculate classification report (accuracy, precision, recall)
-            - Plot confusion matrix
+            - Plots test set distribution
+            - Makes prediction on test set
+            - Calculates classification report (accuracy, precision, recall)
+            - Plots confusion matrix
         """
 
         self._plot_test_set_distribution()
@@ -248,8 +247,11 @@ class Evaluation:
     ) -> Tuple[TYPE_IMAGE_LIST, TYPE_IMAGE_LIST]:
         """Gets correctly and wrongly predicted samples for a given label.
 
-        Attributes:
+        Args:
             label: int or str (label for which the predictions should be considered).
+
+        Returns:
+            (correct, wrong): Tuple of two image lists.
         """
         correct = []
         wrong = []
@@ -274,7 +276,7 @@ class Evaluation:
     ):
         """Visualizes images in a sample list.
 
-        Attributes:
+        Args:
             image_list: sample list.
             show_heatmap: boolean (generates a gradient based class activation map (grad-CAM), default False).
             n_plot: maximum number of plots to be shown (default 20).

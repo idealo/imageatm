@@ -70,11 +70,10 @@ class DataPrep:
         part_size: float = PART_SIZE,
         **kwargs
     ) -> None:
-        """
-        Inits data preparation object.
+        """Inits data preparation component.
 
-        Load samples file. Initialize variables for further operations:
-        valid_image_ids, class_mapping, train_samples, val_samples, test_samples.
+        Loads samples file. Initializes variables for further operations:
+        *valid_image_ids*, *class_mapping*, *train_samples*, *val_samples*, *test_samples*.
         """
         self.job_dir = Path(job_dir).resolve()
         if not self.job_dir.exists():
@@ -340,15 +339,15 @@ class DataPrep:
     def run(self, resize: bool = False):
         """Executes all steps of data preparation.
 
-            - Validate samples and images
-            - Create class-mapping (string to integer)
-            - Apply class-mapping on samples
-            - Split sample into train, validation and test sets
-            - Resize images
-            - Save files (class-mapping, train-, validation- and test-set)
+            - Validates samples and images
+            - Creates class-mapping (string to integer)
+            - Applies class-mapping on samples
+            - Splits sample into train, validation and test sets
+            - Resizes images
+            - Saves files (class-mapping, train-, validation- and test-set)
 
         Args:
-            resize: boolean.
+            resize: boolean (creates a subfolder of resized images, default False).
         """
         self._validate_images()
         self._validate_samples()
