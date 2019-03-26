@@ -6,11 +6,11 @@ data_prep:
   resize: True
 
 train:
-  run: True
+  run: False
   cloud: False
 
 evaluate:
-  run: True
+  run: False
 
 cloud:
   run: False

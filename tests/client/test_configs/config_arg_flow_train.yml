@@ -1,5 +1,5 @@
 data_prep:
-  run: True
+  run: False
   samples_file: tests/data/test_samples/test_arg_flow.json
   image_dir: tests/data/test_images
   job_dir: tests/data/test_arg_flow
@@ -8,9 +8,11 @@ data_prep:
 train:
   run: True
   cloud: False
+  image_dir: tests/data/test_images_resized
+  job_dir: tests/data/test_arg_flow
 
 evaluate:
-  run: True
+  run: False
 
 cloud:
   run: False

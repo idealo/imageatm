@@ -1,66 +1,94 @@
 import pytest
 import shutil
-import logging
 from pathlib import Path
 from imageatm.client.client import Config
-from imageatm.client.commands import pipeline, train, evaluate, cloud
-from imageatm.client.config import (
-    config_set_job_dir,
-    config_set_image_dir,
-    update_component_configs,
-    update_config,
-    get_diff,
-)
+from imageatm.client.commands import pipeline, train, evaluate, cloud, dataprep
+
 
 p = Path(__file__)
 TEST_CONFIG_PIPE = p.resolve().parent / 'test_configs' / 'config_arg_flow_all.yml'
-# TEST_CONFIG_DATA_PREP = p.resolve().parent / 'test_configs' / 'config_data_prep.yml'
-# TEST_CONFIG_TRAIN = p.resolve().parent / 'test_configs' / 'config_train.yml'
-# TEST_CONFIG_EVAL = p.resolve().parent / 'test_configs' / 'config_evaluate.yml'
+TEST_CONFIG_DATAPREP = p.resolve().parent / 'test_configs' / 'config_arg_flow_dataprep.yml'
+TEST_CONFIG_TRAIN = p.resolve().parent / 'test_configs' / 'config_arg_flow_train.yml'
 
-TEST_SAMPLES = Path('../../../data/test_samples/test_str_labels.json')
-TEST_IMAGE_DIR = Path('../../../data/test_images')
-TEST_JOB_DIR = Path('../../../data/test_data_prep/job_dir')
+TEST_SAMPLES = Path('tests/data/test_samples/test_arg_flow.json')
+TEST_IMAGE_DIR = Path('tests/data/test_images')
+TEST_IMAGE_DIR_RES = Path('tests/data/test_images_resized')
+TEST_JOB_DIR = Path('tests/data/test_arg_flow')
 
-'''
+
 @pytest.fixture(scope='session', autouse=True)
 def tear_down(request):
     def remove_job_dir():
-        shutil.rmtree(Path('../../../data/test_evaluate/'))
-        shutil.rmtree(Path('../../../data/test_train/'))
-        shutil.rmtree(Path('../../../data/test_data_prep'))
+        shutil.rmtree(TEST_JOB_DIR)
+        # shutil.rmtree(TEST_IMAGE_DIR_RES)
 
     request.addfinalizer(remove_job_dir)
-'''
 
 
 class TestArgFlow(object):
-    def test_pipeline(self, mocker):
-        mp_dp_run = mocker.patch('imageatm.components.data_prep.DataPrep.run')
-        mp_t_run = mocker.patch('imageatm.components.training.Training.run')
-        mp_e_run = mocker.patch('imageatm.components.evaluation.Evaluation.run')
-        mp_dp_load_json = mocker.patch('imageatm.components.data_prep.load_json', return_value={})
-        mp_t_load_json = mocker.patch('imageatm.components.training.load_json', return_value={})
-        mp_e_load_json = mocker.patch('imageatm.components.evaluation.load_json', return_value={})
-        mp_load_best_model = mocker.patch(
-            'imageatm.components.evaluation.Evaluation._load_best_model'
-        )
-        mp_create_evaluation_dir = mocker.patch(
-            'imageatm.components.evaluation.Evaluation._create_evaluation_dir'
-        )
-        mp_run_cmd = mocker.patch('imageatm.components.cloud.run_cmd')
-
+    def test_dataprep(self):
         config = Config()
 
-        pipeline(config, config_file=TEST_CONFIG_PIPE)
+        assert not TEST_IMAGE_DIR_RES.exists()
+        assert not Path(TEST_JOB_DIR / 'class_mapping.json').exists()
+        assert not Path(TEST_JOB_DIR / 'test_samples.json').exists()
+        assert not Path(TEST_JOB_DIR / 'train_samples.json').exists()
+        assert not Path(TEST_JOB_DIR / 'val_samples.json').exists()
 
-        mp_dp_run.assert_called_with(resize=True)
-        mp_dp_load_json.assert_called_with(TEST_SAMPLES)
+        dataprep(config, config_file=TEST_CONFIG_DATAPREP)
 
         assert config.data_prep['run'] == True
         assert config.data_prep['job_dir'] == str(TEST_JOB_DIR)
         assert config.data_prep['samples_file'] == str(TEST_SAMPLES)
-        assert config.data_prep['image_dir'] == TEST_IMAGE_DIR
+        assert config.data_prep['image_dir'] == str(TEST_IMAGE_DIR)
+        assert config.data_prep['resize'] == True
+
+        assert config.train['run'] == False
+        assert config.evaluate['run'] == False
+        assert config.cloud['run'] == False
+
+        assert TEST_IMAGE_DIR_RES.exists()
+        assert Path(TEST_JOB_DIR / 'class_mapping.json').exists()
+        assert Path(TEST_JOB_DIR / 'test_samples.json').exists()
+        assert Path(TEST_JOB_DIR / 'train_samples.json').exists()
+        assert Path(TEST_JOB_DIR / 'val_samples.json').exists()
+
+    def test_train(self):
+        config = Config()
+
+        assert not list(Path(TEST_JOB_DIR / 'models').glob('*.hdf5'))
+
+        train(config, config_file=TEST_CONFIG_TRAIN)
+
+        assert config.train['run'] == True
+        assert config.train['cloud'] == False
+        assert config.train['job_dir'] == str(TEST_JOB_DIR)
+        assert config.train['image_dir'] == str(TEST_IMAGE_DIR_RES)
+
+        assert config.data_prep['run'] == False
+        assert config.evaluate['run'] == False
+        assert config.cloud['run'] == False
+
+        assert list(Path(TEST_JOB_DIR / 'models').glob('*.hdf5'))
+
+    '''def test_evaluate(self):
+        config = Config()
+        evaluate(config, config_file=TEST_CONFIG_PIPE)
+
+    def test_cloud(self, mocker):
+        mocker.patch('imageatm.components.cloud.run_cmd')
+        config = Config()
+        cloud(config, config_file=TEST_CONFIG_PIPE)
+
+    def test_pipeline(self):
+        config = Config()
+
+        pipeline(config, config_file=TEST_CONFIG_PIPE)
+
+        assert config.data_prep['run'] == True
+        assert config.data_prep['job_dir'] == str(TEST_JOB_DIR)
+        assert config.data_prep['samples_file'] == str(TEST_SAMPLES)
+        assert config.data_prep['image_dir'] == TEST_IMAGE_DIR_RES
         assert config.data_prep['resize'] == True
 
         assert config.train['run'] == True
@@ -68,7 +96,7 @@ class TestArgFlow(object):
 
         assert config.evaluate['run'] == True
 
-        assert config.cloud['run'] == True
+        assert config.cloud['run'] == False
         assert config.cloud['provider'] == 'aws'
         assert config.cloud['tf_dir'] == 'cloud/aws'
         assert config.cloud['region'] == 'eu-west-1'
@@ -77,3 +105,8 @@ class TestArgFlow(object):
         assert config.cloud['bucket'] == 's3://test_bucket'
         assert config.cloud['destroy'] == True
         assert config.cloud['cloud_tag'] == 'test_user'
+
+        assert list(TEST_JOB_DIR.glob('*/confusion_matrix.pdf'))
+        assert list(TEST_JOB_DIR.glob('*/test_set_distribution.pdf'))
+        assert list(Path(TEST_JOB_DIR / 'models').glob('*.hdf5'))
+        '''
