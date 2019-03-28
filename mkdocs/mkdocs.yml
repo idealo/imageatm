@@ -36,5 +36,8 @@ theme:
   logo: 'img/logo.svg'
   favicon: 'img/favicon.ico'
 
+repo_name: 'idealo/imageatm'
+repo_url: 'https://github.com/idealo/imageatm'
+
 markdown_extensions:
   - codehilite

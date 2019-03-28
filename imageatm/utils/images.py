@@ -37,7 +37,7 @@ def validate_image(
         - file is an image
 
     Args:
-        filename: Absolute path of file.
+        file_name: Absolute path of file.
 
      Returns:
         True if file is valid image file.
