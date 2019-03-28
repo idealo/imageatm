@@ -39,12 +39,16 @@ class AWS:
         cloud_tag: str,
         **kwargs
     ) -> None:
+        """Inits cloud component.
+
+        Sets *remote workdir* and ensures that *s3 bucket prefix* is correct.
+        """
         self.tf_dir = tf_dir
         self.region = region
         self.instance_type = instance_type
         self.vpc_id = vpc_id
         self.s3_bucket = s3_bucket  # needed for IAM setup; bucket will not be created by terraform
-        self.job_dir = os.path.abspath(job_dir)
+        self.job_dir = Path(job_dir).resolve()
         self.cloud_tag = cloud_tag
 
         self.image_dir: Optional[str] = None
@@ -191,11 +195,11 @@ class AWS:
         """Runs training on EC2 instance.
 
         The following steps will be performed in sequence:
-            - sync local image and job directory with S3
-            - sync S3 with EC2 instance
-            - launch Docker training container on EC2
-            - sync EC2 with S3
-            - sync S3 with local.
+            - syncs local image and job directory with S3
+            - syncs S3 with EC2 instance
+            - launches Docker training container on EC2
+            - syncs EC2 with S3
+            - syncs S3 with local.
 
         Any of the pre-trained CNNs in Keras can be used.
 
@@ -214,6 +218,9 @@ class AWS:
         self.logger.info('Setting up remote instance...')
         if image_dir is not None:
             self.image_dir = os.path.abspath(image_dir)
+
+        if job_dir is not None:
+            self.job_dir = os.path.abspath(job_dir)
 
         self._sync_local_s3()
         self._sync_s3_remote()

@@ -2,9 +2,11 @@ import shutil
 import pytest
 import numpy.testing as npt
 from collections import Counter
+from mock import call
 from pathlib import Path
 from imageatm.components.data_prep import DataPrep
 from imageatm.utils.io import load_json
+from imageatm.utils.images import resize_image_mp
 
 p = Path(__file__)
 """Files for test_valid_images."""
@@ -21,6 +23,8 @@ TEST_FILE_STR2INT = p.parent / '../data/test_samples' / 'test_int_labels.json'
 
 TEST_IMG_DIR = p.parent / '../data/test_images'
 
+TEST_NO_IMG_DIR = p.parent / '../data/test_no_images'
+
 TEST_SPLIT_FILE = p.parent / '../data/test_samples' / 'test_split.json'
 
 TEST_STR_FILE_CORRUPTED = p.parent / '../data/test_samples' / 'test_str_labels_corrupted.json'
@@ -32,6 +36,7 @@ TEST_JOB_DIR = p.parent / 'test_job_dir'
 def tear_down(request):
     def remove_job_dir():
         shutil.rmtree(TEST_JOB_DIR)
+        shutil.rmtree(p.parent / '../data/test_images_resized')
 
     request.addfinalizer(remove_job_dir)
 
@@ -48,7 +53,7 @@ class TestDataPrep(object):
         assert dp.job_dir == TEST_JOB_DIR
         assert dp.samples_file == TEST_STR_FILE
 
-    def test__validate_images(self):
+    def test__validate_images_1(self):
         expected = [
             'helmet_1.jpg',
             'helmet_10.jpg',
@@ -67,6 +72,28 @@ class TestDataPrep(object):
         dp._validate_images()
 
         assert sorted(dp.valid_image_ids) == expected
+
+    def test__validate_images_2(self, mocker):
+        mp_save_json = mocker.patch('imageatm.components.data_prep.save_json')
+
+        global dp
+        dp.image_dir = TEST_NO_IMG_DIR
+
+        invalid_image_files = []
+        files = [str(i.absolute()) for i in dp.image_dir.glob('*')]
+        files.sort()
+        for file in files:
+            inv_tuple = (
+                str(file),
+                str(OSError("cannot identify image file '{}'".format(str(file)))),
+            )
+            invalid_image_files.append(inv_tuple)
+
+        dp._validate_images()
+
+        mp_save_json.assert_called_with(
+            invalid_image_files, dp.job_dir / 'invalid_image_files.json'
+        )
 
     def test__validate_sample(self):
         global dp
@@ -93,7 +120,7 @@ class TestDataPrep(object):
         result = dp._validate_sample(sample, valid_image_ids)
         assert result == False
 
-    def test__validate_samples(self):
+    def test__validate_samples_1(self):
         global dp
         expected = load_json(TEST_STR_FILE)
 
@@ -117,6 +144,56 @@ class TestDataPrep(object):
         dp._validate_samples()
 
         assert dp.samples == expected
+
+    def test__validate_samples_2(self, mocker):
+        mp_logger_info = mocker.patch('logging.Logger.info')
+
+        global dp
+        dp.valid_image_ids = ['1.jpg', '2.jpg', '3.jpg', '4.jpg']
+        dp.samples = load_json(TEST_INT_FILE)
+        dp._validate_samples()
+        calls = [
+            call('\n****** Running samples validation ******\n'),
+            call('The following samples were dropped:'),
+            call("- {'image_id': '5.jpg', 'label': 1}"),
+            call("- {'image_id': '6.jpg', 'label': 1}"),
+            call("- {'image_id': '7.jpg', 'label': 2}"),
+            call("- {'image_id': '8.jpg', 'label': 1}"),
+            call("- {'image_id': '9.jpg', 'label': 1}"),
+            call("- {'image_id': '10.jpg', 'label': 2}"),
+            call("- {'image_id': '11.jpg', 'label': 1}"),
+            call("- {'image_id': '12.jpg', 'label': 1}"),
+            call("- {'image_id': '13.jpg', 'label': 1}"),
+            call("- {'image_id': '14.jpg', 'label': 2}"),
+            call(
+                'NOTE: 26 samples were identified as invalid.\n'
+                'The full list of invalid samples will be saved in job dir.\n'
+            ),
+            call('Class distribution after validation:'),
+            call('1: 2 (50.0%)'),
+            call('2: 2 (50.0%)'),
+        ]
+
+        mp_logger_info.assert_has_calls(calls)
+
+    def test__validate_samples_3(self):
+        global dp
+
+        dp.min_class_size = 1000
+        dp.valid_image_ids = ['1.jpg', '2.jpg', '3.jpg', '4.jpg']
+
+        with pytest.raises(AssertionError) as excinfo:
+            dp._validate_samples()
+
+        assert 'Program ended. Collect more samples.' in str(excinfo)
+
+        dp.min_class_size = 1
+        dp.valid_image_ids = ['2.jpg', '3.jpg']
+
+        with pytest.raises(AssertionError) as excinfo:
+            dp._validate_samples()
+
+        assert 'Program ended. Only one label in the dataset.' in str(excinfo)
 
     def test__create_class_mapping(self):
         global dp
@@ -314,3 +391,118 @@ class TestDataPrep(object):
         assert train_labels_count[1] == 27
         assert train_labels_count[2] == 16
         assert train_labels_count[3] == 10
+
+    def test_run_1(self, mocker):
+        mp_validate_images = mocker.patch('imageatm.components.data_prep.DataPrep._validate_images')
+        mp_validate_samples = mocker.patch(
+            'imageatm.components.data_prep.DataPrep._validate_samples'
+        )
+        mp_create_class_mapping = mocker.patch(
+            'imageatm.components.data_prep.DataPrep._create_class_mapping'
+        )
+        mp_apply_class_mapping = mocker.patch(
+            'imageatm.components.data_prep.DataPrep._apply_class_mapping'
+        )
+        mp_split_samples = mocker.patch('imageatm.components.data_prep.DataPrep._split_samples')
+        mp_resize_images = mocker.patch('imageatm.components.data_prep.DataPrep._resize_images')
+        mp_save_files = mocker.patch('imageatm.components.data_prep.DataPrep._save_files')
+
+        global dp
+        dp.image_dir == TEST_IMG_DIR
+        dp.job_dir == TEST_JOB_DIR
+        dp.samples_file == TEST_STR_FILE
+
+        dp.run(resize=False)
+
+        mp_validate_images.assert_called_once()
+        mp_validate_samples.assert_called_once()
+        mp_create_class_mapping.assert_called_once()
+        mp_apply_class_mapping.assert_called_once()
+        mp_split_samples.assert_called_once()
+        mp_resize_images.assert_not_called()
+        mp_save_files.assert_called_once()
+
+    def test_run_2(self, mocker):
+        mp_validate_images = mocker.patch('imageatm.components.data_prep.DataPrep._validate_images')
+        mp_validate_samples = mocker.patch(
+            'imageatm.components.data_prep.DataPrep._validate_samples'
+        )
+        mp_create_class_mapping = mocker.patch(
+            'imageatm.components.data_prep.DataPrep._create_class_mapping'
+        )
+        mp_apply_class_mapping = mocker.patch(
+            'imageatm.components.data_prep.DataPrep._apply_class_mapping'
+        )
+        mp_split_samples = mocker.patch('imageatm.components.data_prep.DataPrep._split_samples')
+        mp_resize_images = mocker.patch('imageatm.components.data_prep.DataPrep._resize_images')
+        mp_save_files = mocker.patch('imageatm.components.data_prep.DataPrep._save_files')
+
+        global dp
+        dp.run(resize=True)
+
+        mp_validate_images.assert_called_once()
+        mp_validate_samples.assert_called_once()
+        mp_create_class_mapping.assert_called_once()
+        mp_apply_class_mapping.assert_called_once()
+        mp_split_samples.assert_called_once()
+        mp_resize_images.assert_called_once()
+        mp_save_files.assert_called_once()
+
+    def test__save_files_1(self, mocker):
+        mp_save_json = mocker.patch('imageatm.components.data_prep.save_json')
+
+        global dp
+        dp.job_dir = TEST_JOB_DIR
+
+        dp._save_files()
+
+        calls = [
+            call(dp.train_samples, dp.job_dir / 'train_samples.json'),
+            call(dp.val_samples, dp.job_dir / 'val_samples.json'),
+            call(dp.test_samples, dp.job_dir / 'test_samples.json'),
+            call(dp.class_mapping, dp.job_dir / 'class_mapping.json'),
+        ]
+
+        mp_save_json.assert_has_calls(calls)
+
+    def test__save_files_2(self, mocker):
+        mp_save_json = mocker.patch('imageatm.components.data_prep.save_json')
+        mp_logger_info = mocker.patch('logging.Logger.info')
+
+        global dp
+        dp.job_dir = TEST_JOB_DIR
+        dp.invalid_samples = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+
+        dp._save_files()
+
+        calls = [
+            call(dp.train_samples, dp.job_dir / 'train_samples.json'),
+            call(dp.val_samples, dp.job_dir / 'val_samples.json'),
+            call(dp.test_samples, dp.job_dir / 'test_samples.json'),
+            call(dp.class_mapping, dp.job_dir / 'class_mapping.json'),
+            call(dp.invalid_samples, dp.job_dir / 'invalid_samples.json'),
+        ]
+
+        mp_save_json.assert_has_calls(calls)
+        mp_logger_info.assert_called_with(
+            'NOTE: More than 10 samples were identified as invalid.\n'
+            'The full list of invalid samples has been saved here:\n{}'.format(
+                dp.job_dir / 'invalid_samples.json'
+            )
+        )
+
+    def test__resize_images(self, mocker):
+        mp_parallelise = mocker.patch('imageatm.components.data_prep.parallelise')
+
+        global dp
+        dp.image_dir = TEST_IMG_DIR
+        dp.job_dir = TEST_JOB_DIR
+        dp.samples_file = TEST_STR_FILE
+        print(dp.image_dir)
+        new_image_dir = '_'.join([str(dp.image_dir), 'resized'])
+        args = [(dp.image_dir, new_image_dir, i['image_id']) for i in dp.samples]
+
+        dp._resize_images()
+
+        mp_parallelise.assert_called_with(resize_image_mp, args)
+        assert str(dp.image_dir) == new_image_dir

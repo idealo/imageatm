@@ -24,7 +24,7 @@ LEARNING_RATE_ALL = 0.0001
 
 
 class Training:
-    """Class that builds the model and runs the training.
+    """Builds model and runs training.
 
     The following pretrained CNNs from Keras can be used for transfer learning:
 
@@ -52,7 +52,6 @@ class Training:
         batch_size: Number of images per batch (default 64).
         dropout_rate: Fraction of nodes before output layer set to random value (default 0.75).
         base_model_name: Name of pretrained CNN (default MobileNet).
-
     """
 
     def __init__(
@@ -69,7 +68,10 @@ class Training:
         loss: str = LOSS,
         **kwargs,
     ) -> None:
+        """Inits training component.
 
+        Checks whether multiprocessing is available and sets number of workers for training.
+        """
         self.image_dir = Path(image_dir).resolve()
         self.job_dir = Path(job_dir).resolve()
 
@@ -223,7 +225,7 @@ class Training:
         respectively. Similarly, *learning_rate_dense* and *learning_rate_all* can be set.
 
         For each phase the learning rate is reduced after five consecutive epochs with no improvement in validation accuracy.
-        The training is stopped early after 15 consecutive epochs with no improvement in validation accuracy
+        The training is stopped early after 15 consecutive epochs with no improvement in validation accuracy.
         """
         self._build_model()
         self._fit_model()
