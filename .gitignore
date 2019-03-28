@@ -166,6 +166,7 @@ mkdocs/docs/client/
 mkdocs/docs/components/
 mkdocs/docs/handlers/
 mkdocs/docs/scripts/
+mkdocs/docs/utils/
 mkdocs/docs/index.md
 mkdocs/docs/CONTRIBUTING.md
 mkdocs/docs/LICENSE.md
