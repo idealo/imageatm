@@ -11,7 +11,7 @@ from sklearn.model_selection import train_test_split
 
 
 MIN_CLASS_SIZE = 2
-VALIDATION_SIZE = 0.1
+VALIDATION_SIZE = 0.15
 TEST_SIZE = 0.2
 PART_SIZE = 1.0
 
