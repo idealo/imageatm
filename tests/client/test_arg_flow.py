@@ -9,6 +9,7 @@ p = Path(__file__)
 TEST_CONFIG_PIPE = p.resolve().parent / 'test_configs' / 'config_arg_flow_all.yml'
 TEST_CONFIG_DATAPREP = p.resolve().parent / 'test_configs' / 'config_arg_flow_dataprep.yml'
 TEST_CONFIG_TRAIN = p.resolve().parent / 'test_configs' / 'config_arg_flow_train.yml'
+TEST_CONFIG_EVAL = p.resolve().parent / 'test_configs' / 'config_arg_flow_eval.yml'
 
 TEST_SAMPLES = Path('tests/data/test_samples/test_arg_flow.json')
 TEST_IMAGE_DIR = Path('tests/data/test_images')
@@ -20,7 +21,6 @@ TEST_JOB_DIR = Path('tests/data/test_arg_flow')
 def tear_down(request):
     def remove_job_dir():
         shutil.rmtree(TEST_JOB_DIR)
-        # shutil.rmtree(TEST_IMAGE_DIR_RES)
 
     request.addfinalizer(remove_job_dir)
 
@@ -71,14 +71,23 @@ class TestArgFlow(object):
 
         assert list(Path(TEST_JOB_DIR / 'models').glob('*.hdf5'))
 
-    '''def test_evaluate(self):
+    def test_evaluate(self):
         config = Config()
-        evaluate(config, config_file=TEST_CONFIG_PIPE)
 
-    def test_cloud(self, mocker):
-        mocker.patch('imageatm.components.cloud.run_cmd')
-        config = Config()
-        cloud(config, config_file=TEST_CONFIG_PIPE)
+        assert not list(TEST_JOB_DIR.glob('*/confusion_matrix.pdf'))
+        assert not list(TEST_JOB_DIR.glob('*/test_set_distribution.pdf'))
+
+        evaluate(config, config_file=TEST_CONFIG_EVAL)
+
+        assert config.data_prep['run'] == False
+        assert config.train['run'] == False
+        assert config.cloud['run'] == False
+
+        assert config.evaluate['run'] == True
+        assert config.evaluate['job_dir'] == str(TEST_JOB_DIR)
+        assert config.evaluate['image_dir'] == str(TEST_IMAGE_DIR_RES)
+        assert list(TEST_JOB_DIR.glob('*/confusion_matrix.pdf'))
+        assert list(TEST_JOB_DIR.glob('*/test_set_distribution.pdf'))
 
     def test_pipeline(self):
         config = Config()
@@ -109,4 +118,3 @@ class TestArgFlow(object):
         assert list(TEST_JOB_DIR.glob('*/confusion_matrix.pdf'))
         assert list(TEST_JOB_DIR.glob('*/test_set_distribution.pdf'))
         assert list(Path(TEST_JOB_DIR / 'models').glob('*.hdf5'))
-        '''
