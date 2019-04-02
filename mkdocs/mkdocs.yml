@@ -39,5 +39,9 @@ theme:
 repo_name: 'idealo/imageatm'
 repo_url: 'https://github.com/idealo/imageatm'
 
+google_analytics:
+  - 'UA-137434942-2'
+  - 'auto'
+
 markdown_extensions:
   - codehilite

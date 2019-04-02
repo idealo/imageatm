@@ -1,0 +1,47 @@
+[
+    {
+        "image_id": "helmet_1.jpg",
+        "label": 0
+    },
+    {
+        "image_id": "helmet_2.jpg",
+        "label": 0
+    },
+    {
+        "image_id": "helmet_3.jpg",
+        "label": 0
+    },
+    {
+        "image_id": "helmet_4.jpg",
+        "label": 0
+    },
+    {
+        "image_id": "helmet_5.jpg",
+        "label": 0
+    },
+    {
+        "image_id": "helmet_6.jpg",
+        "label": 0
+    },
+    {
+        "image_id": "helmet_7.jpg",
+        "label": 1
+    },
+    {
+        "image_id": "helmet_8.jpg",
+        "label": 1
+    },
+    {
+        "image_id": "helmet_9.jpg",
+        "label": 1
+    },
+    {
+        "image_id": "helmet_10.jpg",
+        "label": 1
+    },
+    {
+        "image_id": "image_png.png",
+        "label": 1
+    }
+
+]
