@@ -2,23 +2,25 @@ import os
 import pytest
 from mock import call
 from pathlib import Path
+from urlpath import URL
 from imageatm.components.cloud import AWS
 
-TEST_TF_DIR = os.path.abspath('./tests/data/test_train_job')
+TEST_TF_DIR = Path('./tests/data/test_train_job').resolve()
 TEST_REGION = 'test-region'
 TEST_INSTANCE_TYPE = 'test_instance_type'
 TEST_VPC_ID = 'test_vpc_id'
-TEST_S3_BUCKET = 's3://test_s3_bucket'
-TEST_JOB_DIR = os.path.abspath('./tests/data/test_train_job')
+TEST_S3_BUCKET = URL('s3://test_s3_bucket')
+TEST_JOB_DIR = Path('./tests/data/test_train_job').resolve()
 TEST_CLOUD_TAG = 'test_cloud_tag'
-TEST_IMG_DIR = os.path.abspath('./tests/data/test_images')
+TEST_IMG_DIR = Path('./tests/data/test_images').resolve()
 
 
 @pytest.fixture(scope='session', autouse=True)
 def tear_down(request):
     def remove_log_file():
-        if os.path.exists(os.path.abspath('./tests/data/test_train_job/logs')):
-            os.remove(os.path.abspath('./tests/data/test_train_job/logs'))
+        p = Path('./tests/data/test_train_job/logs').resolve()
+        if p.exists():
+            p.unlink()
 
     request.addfinalizer(remove_log_file)
 
@@ -48,7 +50,7 @@ class TestAWS(object):
         assert aws.s3_bucket == TEST_S3_BUCKET
         assert aws.job_dir == Path(TEST_JOB_DIR)
         assert aws.cloud_tag == TEST_CLOUD_TAG
-        assert aws.remote_workdir == '/home/ec2-user/image-atm'
+        assert aws.remote_workdir == Path('/home/ec2-user/image-atm').resolve()
         mp__check_s3_prefix.assert_called_once()
 
     def test__check_s3_prefix(self):
@@ -56,11 +58,11 @@ class TestAWS(object):
 
         aws.s3_bucket = TEST_S3_BUCKET
         aws._check_s3_prefix()
-        assert aws.s3_bucket == 's3://test_s3_bucket'
+        assert aws.s3_bucket == URL('s3://test_s3_bucket')
 
         aws.s3_bucket = 'test_s3_bucket'
         aws._check_s3_prefix()
-        assert aws.s3_bucket == 's3://test_s3_bucket'
+        assert aws.s3_bucket == URL('s3://test_s3_bucket')
 
     def test__set_ssh(self, mocker):
         mp_run_cmd = mocker.patch('imageatm.components.cloud.run_cmd')
@@ -87,8 +89,8 @@ class TestAWS(object):
         aws._set_remote_dirs()
         assert hasattr(aws, 'remote_image_dir')
         assert hasattr(aws, 'remote_job_dir')
-        assert aws.remote_image_dir == '/home/ec2-user/image-atm/test_images'
-        assert aws.remote_job_dir == '/home/ec2-user/image-atm/test_train_job'
+        assert aws.remote_image_dir == Path('/home/ec2-user/image-atm/test_images').resolve()
+        assert aws.remote_job_dir == Path('/home/ec2-user/image-atm/test_train_job').resolve()
 
     def test__set_s3_dirs(self):
         aws.image_dir = TEST_IMG_DIR
@@ -99,16 +101,16 @@ class TestAWS(object):
 
         aws._set_s3_dirs()
 
-        assert aws.s3_image_dir == 's3://test_s3_bucket/image_dirs/test_images'
-        assert aws.s3_job_dir == 's3://test_s3_bucket/job_dirs/test_train_job'
+        assert aws.s3_image_dir == URL('s3://test_s3_bucket/image_dirs/test_images')
+        assert aws.s3_job_dir == URL('s3://test_s3_bucket/job_dirs/test_train_job')
 
-        aws.image_dir = 's3://test_s3_bucket/image_dirs/test_images2'
-        aws.job_dir = 's3://test_s3_bucket/job_dirs/test_train_job2'
+        aws.image_dir = URL('s3://test_s3_bucket/image_dirs/test_images2')
+        aws.job_dir = URL('s3://test_s3_bucket/job_dirs/test_train_job2')
 
         aws._set_s3_dirs()
 
-        assert aws.s3_image_dir == 's3://test_s3_bucket/image_dirs/test_images2'
-        assert aws.s3_job_dir == 's3://test_s3_bucket/job_dirs/test_train_job2'
+        assert aws.s3_image_dir == URL('s3://test_s3_bucket/image_dirs/test_images2')
+        assert aws.s3_job_dir == URL('s3://test_s3_bucket/job_dirs/test_train_job2')
 
     def test__sync_local_s3_1(self, mocker):
         mp_run_cmd = mocker.patch('imageatm.components.cloud.run_cmd')
@@ -118,13 +120,13 @@ class TestAWS(object):
         calls = [
             call(
                 'aws s3 sync --quiet --exclude logs {} {}'.format(
-                    TEST_IMG_DIR, 's3://test_s3_bucket/image_dirs/test_images'
+                    TEST_IMG_DIR, URL('s3://test_s3_bucket/image_dirs/test_images')
                 ),
                 logger=aws.logger,
             ),
             call(
                 'aws s3 sync --quiet --exclude logs {} {}'.format(
-                    TEST_JOB_DIR, 's3://test_s3_bucket/job_dirs/test_train_job'
+                    TEST_JOB_DIR, URL('s3://test_s3_bucket/job_dirs/test_train_job')
                 ),
                 logger=aws.logger,
             ),
@@ -136,8 +138,8 @@ class TestAWS(object):
     def test__sync_local_s3_2(self, mocker):
         mp_run_cmd = mocker.patch('imageatm.components.cloud.run_cmd')
 
-        aws.image_dir = 's3://test_s3_bucket/image_dirs/test_images'
-        aws.job_dir = 's3://test_s3_bucket/job_dirs/test_train_job'
+        aws.image_dir = URL('s3://test_s3_bucket/image_dirs/test_images')
+        aws.job_dir = URL('s3://test_s3_bucket/job_dirs/test_train_job')
 
         aws._sync_local_s3()
         mp_run_cmd.assert_not_called()
@@ -149,7 +151,7 @@ class TestAWS(object):
         aws._sync_s3_local()
         mp_run_cmd.assert_called_with(
             'aws s3 sync --exclude logs --quiet {} {}'.format(
-                's3://test_s3_bucket/job_dirs/test_train_job', TEST_JOB_DIR
+                URL('s3://test_s3_bucket/job_dirs/test_train_job'), TEST_JOB_DIR
             ),
             logger=aws.logger,
             level='info',
@@ -158,7 +160,7 @@ class TestAWS(object):
     def test__sync_s3_local_2(self, mocker):
         mp_run_cmd = mocker.patch('imageatm.components.cloud.run_cmd')
 
-        aws.job_dir = 's3://test_s3_bucket/job_dirs/test_train_job'
+        aws.job_dir = URL('s3://test_s3_bucket/job_dirs/test_train_job')
         aws._sync_s3_local()
         mp_run_cmd.assert_not_called()
 
@@ -172,16 +174,16 @@ class TestAWS(object):
             call(
                 '{} aws s3 sync --exclude logs --quiet {} {}'.format(
                     'test_ssh',
-                    '/home/ec2-user/image-atm/test_images',
-                    's3://test_s3_bucket/image_dirs/test_images',
+                    Path('/home/ec2-user/image-atm/test_images'),
+                    URL('s3://test_s3_bucket/image_dirs/test_images'),
                 ),
                 logger=aws.logger,
             ),
             call(
                 '{} aws s3 sync --exclude logs --quiet {} {}'.format(
                     'test_ssh',
-                    '/home/ec2-user/image-atm/test_train_job',
-                    's3://test_s3_bucket/job_dirs/test_train_job',
+                    Path('/home/ec2-user/image-atm/test_train_job'),
+                    URL('s3://test_s3_bucket/job_dirs/test_train_job'),
                 ),
                 logger=aws.logger,
             ),
@@ -193,23 +195,23 @@ class TestAWS(object):
     def test__sync_remote_s3_2(self, mocker):
         mp_run_cmd = mocker.patch('imageatm.components.cloud.run_cmd')
 
-        aws.image_dir = 's3://test_s3_bucket/image_dirs/test_images'
-        aws.job_dir = 's3://test_s3_bucket/job_dirs/test_train_job'
+        aws.image_dir = URL('s3://test_s3_bucket/image_dirs/test_images')
+        aws.job_dir = URL('s3://test_s3_bucket/job_dirs/test_train_job')
         aws.ssh = 'test_ssh'
         calls = [
             call(
                 '{} aws s3 sync --exclude logs --quiet {} {}'.format(
                     'test_ssh',
-                    '/home/ec2-user/image-atm/test_images',
-                    's3://test_s3_bucket/image_dirs/test_images',
+                    Path('/home/ec2-user/image-atm/test_images'),
+                    URL('s3://test_s3_bucket/image_dirs/test_images'),
                 ),
                 logger=aws.logger,
             ),
             call(
                 '{} aws s3 sync --exclude logs --quiet {} {}'.format(
                     'test_ssh',
-                    '/home/ec2-user/image-atm/test_train_job',
-                    's3://test_s3_bucket/job_dirs/test_train_job',
+                    Path('/home/ec2-user/image-atm/test_train_job'),
+                    URL('s3://test_s3_bucket/job_dirs/test_train_job'),
                 ),
                 logger=aws.logger,
             ),
@@ -228,16 +230,16 @@ class TestAWS(object):
             call(
                 '{} aws s3 sync --exclude logs --quiet {} {}'.format(
                     'test_ssh',
-                    's3://test_s3_bucket/image_dirs/test_images',
-                    '/home/ec2-user/image-atm/test_images',
+                    URL('s3://test_s3_bucket/image_dirs/test_images'),
+                    Path('/home/ec2-user/image-atm/test_images'),
                 ),
                 logger=aws.logger,
             ),
             call(
                 '{} aws s3 sync --exclude logs --quiet {} {}'.format(
                     'test_ssh',
-                    's3://test_s3_bucket/job_dirs/test_train_job',
-                    '/home/ec2-user/image-atm/test_train_job',
+                    URL('s3://test_s3_bucket/job_dirs/test_train_job'),
+                    Path('/home/ec2-user/image-atm/test_train_job'),
                 ),
                 logger=aws.logger,
             ),
@@ -248,23 +250,23 @@ class TestAWS(object):
     def test__sync_s3_remote_2(self, mocker):
         mp_run_cmd = mocker.patch('imageatm.components.cloud.run_cmd')
 
-        aws.image_dir = 's3://test_s3_bucket/image_dirs/test_images'
-        aws.job_dir = 's3://test_s3_bucket/job_dirs/test_train_job'
+        aws.image_dir = URL('s3://test_s3_bucket/image_dirs/test_images')
+        aws.job_dir = URL('s3://test_s3_bucket/job_dirs/test_train_job')
         aws.ssh = 'test_ssh'
         calls = [
             call(
                 '{} aws s3 sync --exclude logs --quiet {} {}'.format(
                     'test_ssh',
-                    's3://test_s3_bucket/image_dirs/test_images',
-                    '/home/ec2-user/image-atm/test_images',
+                    URL('s3://test_s3_bucket/image_dirs/test_images'),
+                    Path('/home/ec2-user/image-atm/test_images'),
                 ),
                 logger=aws.logger,
             ),
             call(
                 '{} aws s3 sync --exclude logs --quiet {} {}'.format(
                     'test_ssh',
-                    's3://test_s3_bucket/job_dirs/test_train_job',
-                    '/home/ec2-user/image-atm/test_train_job',
+                    URL('s3://test_s3_bucket/job_dirs/test_train_job'),
+                    Path('/home/ec2-user/image-atm/test_train_job'),
                 ),
                 logger=aws.logger,
             ),
@@ -283,8 +285,8 @@ class TestAWS(object):
             '{} docker run -d -v {}:$WORKDIR/image_dir -v {}:$WORKDIR/job_dir {} '
             'idealo/tensorflow-image-atm:1.13.1'.format(
                 'test_ssh',
-                '/home/ec2-user/image-atm/test_images',
-                '/home/ec2-user/image-atm/test_train_job',
+                Path('/home/ec2-user/image-atm/test_images'),
+                Path('/home/ec2-user/image-atm/test_train_job'),
                 '-e key_1=test -e key_2=1',
             ),
             logger=aws.logger,
@@ -321,7 +323,7 @@ class TestAWS(object):
                     TEST_REGION,
                     TEST_INSTANCE_TYPE,
                     TEST_VPC_ID,
-                    'test_s3_bucket',
+                    URL('test_s3_bucket'),
                     TEST_CLOUD_TAG,
                 ),
                 logger=aws.logger,
@@ -351,7 +353,7 @@ class TestAWS(object):
         aws.job_dir = TEST_JOB_DIR
 
         aws.train()
-        assert aws.image_dir == os.path.abspath(TEST_IMG_DIR)
+        assert aws.image_dir == Path(TEST_IMG_DIR).resolve()
         mp__sync_local_s3.assert_called_once()
         mp__sync_s3_remote.assert_called_once()
         mp__launch_train_container.assert_called_once()
@@ -371,7 +373,7 @@ class TestAWS(object):
         mp__sync_s3_local = mocker.patch('imageatm.components.cloud.AWS._sync_s3_local')
 
         aws.train(image_dir='./tests/data/test_no_images')
-        assert aws.image_dir == os.path.abspath('./tests/data/test_no_images')
+        assert aws.image_dir == Path('./tests/data/test_no_images').resolve()
         mp__sync_local_s3.assert_called_once()
         mp__sync_s3_remote.assert_called_once()
         mp__launch_train_container.assert_called_once()
@@ -392,7 +394,7 @@ class TestAWS(object):
                 TEST_REGION,
                 TEST_INSTANCE_TYPE,
                 TEST_VPC_ID,
-                'test_s3_bucket',
+                URL('test_s3_bucket'),
                 TEST_CLOUD_TAG,
             ),
             logger=aws.logger,
@@ -422,7 +424,7 @@ class TestAWS(object):
         aws2.init()
         aws2.apply()
 
-        NEW_JOB_DIR = os.path.abspath('./tests/data/test_train_job_copy')
+        NEW_JOB_DIR = Path('./tests/data/test_train_job_copy').resolve()
 
         aws2.train(job_dir=NEW_JOB_DIR)
         aws2.destroy()

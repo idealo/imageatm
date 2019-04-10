@@ -1,7 +1,7 @@
-import os
 import time
-from pathlib import Path
+from pathlib import Path, PosixPath, PurePosixPath
 from typing import Optional
+from urlpath import URL
 from imageatm.utils.process import run_cmd
 from imageatm.utils.logger import get_logger
 
@@ -47,13 +47,18 @@ class AWS:
         self.region = region
         self.instance_type = instance_type
         self.vpc_id = vpc_id
-        self.s3_bucket = s3_bucket  # needed for IAM setup; bucket will not be created by terraform
-        self.job_dir = Path(job_dir).resolve()
+        self.s3_bucket = URL(
+            s3_bucket
+        )  # needed for IAM setup; bucket will not be created by terraform
         self.cloud_tag = cloud_tag
+        if 's3://' in str(job_dir):
+            self.job_dir = URL(job_dir)
+        else:
+            self.job_dir = Path(job_dir).resolve()
 
         self.image_dir: Optional[str] = None
         self.ssh: Optional[str] = None
-        self.remote_workdir = '/home/ec2-user/image-atm'
+        self.remote_workdir = Path('/home/ec2-user/image-atm').resolve()
 
         self._check_s3_prefix()
 
@@ -61,8 +66,8 @@ class AWS:
 
     def _check_s3_prefix(self):
         # ensure that s3 bucket prefix is correct
-        self.s3_bucket_wo = self.s3_bucket.split('s3://')[-1]  # without s3:// prefix
-        self.s3_bucket = 's3://' + self.s3_bucket_wo
+        self.s3_bucket_wo = str(self.s3_bucket).split('s3://')[-1]  # without s3:// prefix
+        self.s3_bucket = URL('s3://' + self.s3_bucket_wo)
 
     def _set_ssh(self):
         cmd = 'cd {} && terraform output public_ip'.format(self.tf_dir)
@@ -73,37 +78,33 @@ class AWS:
         cmd = '{} mkdir -p {}'.format(self.ssh, self.remote_workdir)
         run_cmd(cmd, logger=self.logger)
 
-        self.remote_image_dir = os.path.join(self.remote_workdir, os.path.basename(self.image_dir))
-        self.remote_job_dir = os.path.join(self.remote_workdir, os.path.basename(self.job_dir))
+        self.remote_image_dir = self.remote_workdir.joinpath(self.image_dir.name)
+        self.remote_job_dir = self.remote_workdir.joinpath(self.job_dir.name)
 
     def _set_s3_dirs(self):
-        if 's3://' in self.image_dir:
+        if isinstance(self.image_dir, URL):
             self.s3_image_dir = self.image_dir
         else:
-            self.s3_image_dir = os.path.join(
-                self.s3_bucket, 'image_dirs', os.path.basename(self.image_dir)
-            )
+            self.s3_image_dir = self.s3_bucket / 'image_dirs' / self.image_dir.name
 
-        if 's3://' in self.job_dir:
+        if isinstance(self.job_dir, URL):
             self.s3_job_dir = self.job_dir
         else:
-            self.s3_job_dir = os.path.join(
-                self.s3_bucket, 'job_dirs', os.path.basename(self.job_dir)
-            )
+            self.s3_job_dir = self.s3_bucket / 'job_dirs' / self.job_dir.name
 
     def _sync_local_s3(self):
         self.logger.info('Syncing files local <> s3...')
         self._set_s3_dirs()
 
         # only sync if image dir is local dir
-        if 's3://' not in self.image_dir:
+        if isinstance(self.image_dir, Path):
             cmd = 'aws s3 sync --quiet --exclude logs {} {}'.format(
                 self.image_dir, self.s3_image_dir
             )
             run_cmd(cmd, logger=self.logger)
 
         # only sync if job dir is local dir
-        if 's3://' not in self.job_dir:
+        if isinstance(self.job_dir, Path):
             cmd = 'aws s3 sync --quiet --exclude logs {} {}'.format(self.job_dir, self.s3_job_dir)
             run_cmd(cmd, logger=self.logger)
 
@@ -112,7 +113,7 @@ class AWS:
         self._set_s3_dirs()
 
         # only sync if job dir is local dir
-        if 's3://' not in self.job_dir:
+        if isinstance(self.job_dir, Path):
             cmd = 'aws s3 sync --exclude logs --quiet {} {}'.format(self.s3_job_dir, self.job_dir)
             run_cmd(cmd, logger=self.logger, level='info')
 
@@ -217,10 +218,10 @@ class AWS:
         """
         self.logger.info('Setting up remote instance...')
         if image_dir is not None:
-            self.image_dir = os.path.abspath(image_dir)
+            self.image_dir = Path(image_dir).resolve()
 
         if job_dir is not None:
-            self.job_dir = os.path.abspath(job_dir)
+            self.job_dir = Path(job_dir).resolve()
 
         self._sync_local_s3()
         self._sync_s3_remote()
