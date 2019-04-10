@@ -1,5 +1,5 @@
 import time
-from pathlib import Path, PosixPath, PurePosixPath
+from pathlib import Path
 from typing import Optional
 from urlpath import URL
 from imageatm.utils.process import run_cmd
