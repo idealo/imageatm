@@ -56,7 +56,7 @@ class AWS:
         else:
             self.job_dir = Path(job_dir).resolve()
 
-        self.image_dir: Optional[str] = None
+        self.image_dir: Optional[Path] = None
         self.ssh: Optional[str] = None
         self.remote_workdir = Path('/home/ec2-user/image-atm').resolve()
 

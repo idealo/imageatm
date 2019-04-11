@@ -82,7 +82,7 @@ class TestEvaluation(object):
         global eval
         eval._load_best_model()
 
-        mp.assert_called_with(str(TEST_JOB_DIR / 'models/model_mobilenet_15_0.375.hdf5'))
+        mp.assert_called_with(TEST_JOB_DIR / 'models/model_mobilenet_15_0.375.hdf5')
 
     def test__plot_test_set_distribution(self, mocker):
         mock_plt_bar = mocker.patch('matplotlib.pyplot.bar')

@@ -1,6 +1,5 @@
 import logging
 import mock
-import os
 import pytest
 import shutil
 import numpy as np
@@ -8,6 +7,7 @@ from keras.layers import Dense
 from keras.models import Sequential
 from keras.utils import np_utils
 from keras.utils.test_utils import get_test_data
+from pathlib import Path
 from imageatm.utils.tf_keras import use_multiprocessing, LoggingModels
 
 input_dim = 2
@@ -17,10 +17,10 @@ batch_size = 5
 train_samples = 20
 test_samples = 20
 
-TEST_DIR = 'tests/data/test_callbacks/'
+TEST_DIR = Path('tests/data/test_callbacks/').resolve()
 
-if not os.path.exists(TEST_DIR):
-    os.makedirs(TEST_DIR)
+if not TEST_DIR.exists():
+    TEST_DIR.mkdir(parents=True)
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -67,7 +67,7 @@ class TestTfKeras(object):
 
         tmpdir = TEST_DIR
         np.random.seed(1337)
-        filepath = str(tmpdir + 'checkpoint.h5')
+        filepath = tmpdir / 'checkpoint.h5'
         (X_train, y_train), (X_test, y_test) = get_data_callbacks()
         y_test = np_utils.to_categorical(y_test)
         y_train = np_utils.to_categorical(y_train)
@@ -98,8 +98,8 @@ class TestTfKeras(object):
             callbacks=cbks,
             epochs=1,
         )
-        assert os.path.isfile(filepath)
-        os.remove(filepath)
+        assert filepath.is_file()
+        filepath.unlink()
 
         # case 2
         mode = 'min'
@@ -120,8 +120,8 @@ class TestTfKeras(object):
             callbacks=cbks,
             epochs=1,
         )
-        assert os.path.isfile(filepath)
-        os.remove(filepath)
+        assert filepath.is_file()
+        filepath.unlink()
 
         # case 3
         mode = 'max'
@@ -143,8 +143,8 @@ class TestTfKeras(object):
             callbacks=cbks,
             epochs=1,
         )
-        assert os.path.isfile(filepath)
-        os.remove(filepath)
+        assert filepath.is_file()
+        filepath.unlink()
 
         # case 4
         save_best_only = True
@@ -165,8 +165,8 @@ class TestTfKeras(object):
             callbacks=cbks,
             epochs=1,
         )
-        assert os.path.isfile(filepath)
-        os.remove(filepath)
+        assert filepath.is_file()
+        filepath.unlink()
 
         # case 5
         monitor = 'val_loss'
@@ -195,9 +195,9 @@ class TestTfKeras(object):
             callbacks=cbks,
             epochs=1,
         )
-        assert os.path.isfile(filepath)
+        assert filepath.is_file()
         mp_logger_warning.assert_called()
-        os.remove(filepath)
+        filepath.unlink()
 
         # case 6
         save_best_only = False
@@ -222,10 +222,10 @@ class TestTfKeras(object):
             callbacks=cbks,
             epochs=4,
         )
-        assert os.path.isfile(filepath.format(epoch=2))
-        assert os.path.isfile(filepath.format(epoch=4))
-        assert not os.path.exists(filepath.format(epoch=1))
-        assert not os.path.exists(filepath.format(epoch=3))
-        os.remove(filepath.format(epoch=2))
-        os.remove(filepath.format(epoch=4))
-        assert not os.listdir(tmpdir)
+        assert Path(filepath.format(epoch=2)).resolve().is_file()
+        assert Path(filepath.format(epoch=4)).resolve().is_file()
+        assert not Path(filepath.format(epoch=1)).resolve().exists()
+        assert not Path(filepath.format(epoch=3)).resolve().exists()
+        Path(filepath.format(epoch=2)).unlink()
+        Path(filepath.format(epoch=4)).unlink()
+        assert not list(tmpdir.glob('*'))
