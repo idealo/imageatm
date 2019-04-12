@@ -31,7 +31,7 @@ def cli(config: Config):
 @click.option('--tf-dir', help='Directory with Terraform configs [aws].')
 @click.option('--train-cloud', is_flag=True, required=False, help='Run training in cloud [aws].')
 @click.option('--destroy', is_flag=True, required=False, help='Destroys cloud.')
-@click.option('--resize', is_flag=True, required=False, help='Resizes images in data_prep.')
+@click.option('--resize', is_flag=True, required=False, help='Resizes images in dataprep.')
 @click.option('--batch-size', type=int, help='Batch size.', required=False)
 @click.option(
     '--epochs-train-dense',

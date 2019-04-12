@@ -2,7 +2,7 @@ import pytest
 import shutil
 from pathlib import Path
 from imageatm.client.client import Config
-from imageatm.client.commands import pipeline, train, evaluate, cloud, dataprep
+from imageatm.client.commands import pipeline, train, evaluate, dataprep
 
 
 p = Path(__file__)
@@ -37,11 +37,11 @@ class TestArgFlow(object):
 
         dataprep(config, config_file=TEST_CONFIG_DATAPREP)
 
-        assert config.data_prep['run'] == True
-        assert config.data_prep['job_dir'] == str(TEST_JOB_DIR)
-        assert config.data_prep['samples_file'] == str(TEST_SAMPLES)
-        assert config.data_prep['image_dir'] == str(TEST_IMAGE_DIR)
-        assert config.data_prep['resize'] == True
+        assert config.dataprep['run'] == True
+        assert config.dataprep['job_dir'] == str(TEST_JOB_DIR)
+        assert config.dataprep['samples_file'] == str(TEST_SAMPLES)
+        assert config.dataprep['image_dir'] == str(TEST_IMAGE_DIR)
+        assert config.dataprep['resize'] == True
 
         assert config.train['run'] == False
         assert config.evaluate['run'] == False
@@ -65,7 +65,7 @@ class TestArgFlow(object):
         assert config.train['job_dir'] == str(TEST_JOB_DIR)
         assert config.train['image_dir'] == str(TEST_IMAGE_DIR_RES)
 
-        assert config.data_prep['run'] == False
+        assert config.dataprep['run'] == False
         assert config.evaluate['run'] == False
         assert config.cloud['run'] == False
 
@@ -79,7 +79,7 @@ class TestArgFlow(object):
 
         evaluate(config, config_file=TEST_CONFIG_EVAL)
 
-        assert config.data_prep['run'] == False
+        assert config.dataprep['run'] == False
         assert config.train['run'] == False
         assert config.cloud['run'] == False
 
@@ -94,11 +94,11 @@ class TestArgFlow(object):
 
         pipeline(config, config_file=TEST_CONFIG_PIPE)
 
-        assert config.data_prep['run'] == True
-        assert config.data_prep['job_dir'] == str(TEST_JOB_DIR)
-        assert config.data_prep['samples_file'] == str(TEST_SAMPLES)
-        assert config.data_prep['image_dir'] == TEST_IMAGE_DIR_RES
-        assert config.data_prep['resize'] == True
+        assert config.dataprep['run'] == True
+        assert config.dataprep['job_dir'] == str(TEST_JOB_DIR)
+        assert config.dataprep['samples_file'] == str(TEST_SAMPLES)
+        assert config.dataprep['image_dir'] == TEST_IMAGE_DIR_RES
+        assert config.dataprep['resize'] == True
 
         assert config.train['run'] == True
         assert config.train['cloud'] == False

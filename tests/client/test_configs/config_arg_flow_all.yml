@@ -1,13 +1,16 @@
-data_prep:
+image_dir: tests/data/test_images
+job_dir: tests/data/test_arg_flow
+
+dataprep:
   run: True
   samples_file: tests/data/test_samples/test_arg_flow.json
-  image_dir: tests/data/test_images
-  job_dir: tests/data/test_arg_flow
   resize: True
 
 train:
   run: True
   cloud: False
+  epochs_train_dense: 1
+  epochs_train_all: 1
 
 evaluate:
   run: True

@@ -123,11 +123,12 @@ with open('data.json', 'w') as outfile:
 ### Train with CLI
 Define your `config_file.yml`:
 ``` yaml
-data_prep:
+image_dir: cats_and_dogs/train
+job_dir: cats_and_dogs_job_dir/
+
+dataprep:
   run: True
   samples_file: data.json
-  image_dir: cats_and_dogs/train
-  job_dir: cats_and_dogs_job_dir/
   resize: True
 
 train:
@@ -318,11 +319,12 @@ Now you are ready to kick off with the cloud training.
 
 Define your `config_file.yml`:
 ``` yaml
-data_prep:
+image_dir: cats_and_dogs/train
+job_dir: cats_and_dogs_job_dir/
+
+dataprep:
   run: True
   samples_file: data.json
-  image_dir: cats_and_dogs/train
-  job_dir: cats_and_dogs_job_dir/
   resize: True
 
 train:

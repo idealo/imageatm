@@ -4,7 +4,7 @@ import numpy.testing as npt
 from collections import Counter
 from mock import call
 from pathlib import Path
-from imageatm.components.data_prep import DataPrep
+from imageatm.components.dataprep import DataPrep
 from imageatm.utils.io import load_json
 from imageatm.utils.images import resize_image_mp
 
@@ -74,7 +74,7 @@ class TestDataPrep(object):
         assert sorted(dp.valid_image_ids) == expected
 
     def test__validate_images_2(self, mocker):
-        mp_save_json = mocker.patch('imageatm.components.data_prep.save_json')
+        mp_save_json = mocker.patch('imageatm.components.dataprep.save_json')
 
         global dp
         dp.image_dir = TEST_NO_IMG_DIR
@@ -393,19 +393,19 @@ class TestDataPrep(object):
         assert train_labels_count[3] == 10
 
     def test_run_1(self, mocker):
-        mp_validate_images = mocker.patch('imageatm.components.data_prep.DataPrep._validate_images')
+        mp_validate_images = mocker.patch('imageatm.components.dataprep.DataPrep._validate_images')
         mp_validate_samples = mocker.patch(
-            'imageatm.components.data_prep.DataPrep._validate_samples'
+            'imageatm.components.dataprep.DataPrep._validate_samples'
         )
         mp_create_class_mapping = mocker.patch(
-            'imageatm.components.data_prep.DataPrep._create_class_mapping'
+            'imageatm.components.dataprep.DataPrep._create_class_mapping'
         )
         mp_apply_class_mapping = mocker.patch(
-            'imageatm.components.data_prep.DataPrep._apply_class_mapping'
+            'imageatm.components.dataprep.DataPrep._apply_class_mapping'
         )
-        mp_split_samples = mocker.patch('imageatm.components.data_prep.DataPrep._split_samples')
-        mp_resize_images = mocker.patch('imageatm.components.data_prep.DataPrep._resize_images')
-        mp_save_files = mocker.patch('imageatm.components.data_prep.DataPrep._save_files')
+        mp_split_samples = mocker.patch('imageatm.components.dataprep.DataPrep._split_samples')
+        mp_resize_images = mocker.patch('imageatm.components.dataprep.DataPrep._resize_images')
+        mp_save_files = mocker.patch('imageatm.components.dataprep.DataPrep._save_files')
 
         global dp
         dp.image_dir == TEST_IMG_DIR
@@ -423,19 +423,19 @@ class TestDataPrep(object):
         mp_save_files.assert_called_once()
 
     def test_run_2(self, mocker):
-        mp_validate_images = mocker.patch('imageatm.components.data_prep.DataPrep._validate_images')
+        mp_validate_images = mocker.patch('imageatm.components.dataprep.DataPrep._validate_images')
         mp_validate_samples = mocker.patch(
-            'imageatm.components.data_prep.DataPrep._validate_samples'
+            'imageatm.components.dataprep.DataPrep._validate_samples'
         )
         mp_create_class_mapping = mocker.patch(
-            'imageatm.components.data_prep.DataPrep._create_class_mapping'
+            'imageatm.components.dataprep.DataPrep._create_class_mapping'
         )
         mp_apply_class_mapping = mocker.patch(
-            'imageatm.components.data_prep.DataPrep._apply_class_mapping'
+            'imageatm.components.dataprep.DataPrep._apply_class_mapping'
         )
-        mp_split_samples = mocker.patch('imageatm.components.data_prep.DataPrep._split_samples')
-        mp_resize_images = mocker.patch('imageatm.components.data_prep.DataPrep._resize_images')
-        mp_save_files = mocker.patch('imageatm.components.data_prep.DataPrep._save_files')
+        mp_split_samples = mocker.patch('imageatm.components.dataprep.DataPrep._split_samples')
+        mp_resize_images = mocker.patch('imageatm.components.dataprep.DataPrep._resize_images')
+        mp_save_files = mocker.patch('imageatm.components.dataprep.DataPrep._save_files')
 
         global dp
         dp.run(resize=True)
@@ -449,7 +449,7 @@ class TestDataPrep(object):
         mp_save_files.assert_called_once()
 
     def test__save_files_1(self, mocker):
-        mp_save_json = mocker.patch('imageatm.components.data_prep.save_json')
+        mp_save_json = mocker.patch('imageatm.components.dataprep.save_json')
 
         global dp
         dp.job_dir = TEST_JOB_DIR
@@ -466,7 +466,7 @@ class TestDataPrep(object):
         mp_save_json.assert_has_calls(calls)
 
     def test__save_files_2(self, mocker):
-        mp_save_json = mocker.patch('imageatm.components.data_prep.save_json')
+        mp_save_json = mocker.patch('imageatm.components.dataprep.save_json')
         mp_logger_info = mocker.patch('logging.Logger.info')
 
         global dp
@@ -492,7 +492,7 @@ class TestDataPrep(object):
         )
 
     def test__resize_images(self, mocker):
-        mp_parallelise = mocker.patch('imageatm.components.data_prep.parallelise')
+        mp_parallelise = mocker.patch('imageatm.components.dataprep.parallelise')
 
         global dp
         dp.image_dir = TEST_IMG_DIR
