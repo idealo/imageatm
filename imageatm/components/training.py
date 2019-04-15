@@ -125,8 +125,7 @@ class Training:
             'model_' + self.base_model_name.lower() + '_{epoch:02d}_{val_acc:.3f}.hdf5'
         )
         model_dir = self.job_dir / 'models'
-        if not model_dir.is_dir():
-            model_dir.mkdir(parents=True)
+        model_dir.mkdir(parents=True, exist_ok=True)
 
         logging_metrics = LoggingMetrics(logger=self.logger)
         logging_models = LoggingModels(

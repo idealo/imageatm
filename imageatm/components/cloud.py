@@ -82,12 +82,12 @@ class AWS:
         self.remote_job_dir = self.remote_workdir.joinpath(self.job_dir.name)
 
     def _set_s3_dirs(self):
-        if isinstance(self.image_dir, URL):
+        if 's3://' in str(self.image_dir):
             self.s3_image_dir = self.image_dir
         else:
             self.s3_image_dir = self.s3_bucket / 'image_dirs' / self.image_dir.name
 
-        if isinstance(self.job_dir, URL):
+        if 's3://' in str(self.job_dir):
             self.s3_job_dir = self.job_dir
         else:
             self.s3_job_dir = self.s3_bucket / 'job_dirs' / self.job_dir.name
@@ -104,7 +104,7 @@ class AWS:
             run_cmd(cmd, logger=self.logger)
 
         # only sync if job dir is local dir
-        if isinstance(self.job_dir, Path):
+        if 's3://' not in str(self.job_dir):
             cmd = 'aws s3 sync --quiet --exclude logs {} {}'.format(self.job_dir, self.s3_job_dir)
             run_cmd(cmd, logger=self.logger)
 
@@ -113,7 +113,7 @@ class AWS:
         self._set_s3_dirs()
 
         # only sync if job dir is local dir
-        if isinstance(self.job_dir, Path):
+        if 's3://' not in str(self.job_dir):
             cmd = 'aws s3 sync --exclude logs --quiet {} {}'.format(self.s3_job_dir, self.job_dir)
             run_cmd(cmd, logger=self.logger, level='info')
 

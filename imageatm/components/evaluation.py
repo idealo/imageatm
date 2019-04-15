@@ -101,8 +101,7 @@ class Evaluation:
             evaluation_dir_name = self.best_model_file.name.split('.hdf5')[0]
             self.evaluation_dir = self.job_dir / 'evaluation_{}'.format(evaluation_dir_name)
 
-            if not self.evaluation_dir.exists():
-                self.evaluation_dir.mkdir(parents=True)
+            self.evaluation_dir.mkdir(parents=True, exist_ok=True)
 
     def _plot_test_set_distribution(self):
         """Plots bars with number of samples for each label in test set."""

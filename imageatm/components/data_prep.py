@@ -75,8 +75,7 @@ class DataPrep:
         *valid_image_ids*, *class_mapping*, *train_samples*, *val_samples*, *test_samples*.
         """
         self.job_dir = Path(job_dir).resolve()
-        if not self.job_dir.exists():
-            self.job_dir.mkdir(parents=True)
+        self.job_dir.mkdir(parents=True, exist_ok=True)
 
         self.image_dir = Path(image_dir)
         self.samples_file = Path(samples_file)
@@ -306,8 +305,7 @@ class DataPrep:
     def _resize_images(self, resize_image_mp: Callable = resize_image_mp):
         self.logger.info('\n****** Resizing images ******\n')
         new_image_dir = '_'.join([str(self.image_dir), 'resized'])
-        if not Path(new_image_dir).resolve().exists():
-            Path(new_image_dir).resolve().mkdir(parents=True)
+        Path(new_image_dir).resolve().mkdir(parents=True, exist_ok=True)
 
         args = [(self.image_dir, new_image_dir, i['image_id']) for i in self.samples]
         parallelise(resize_image_mp, args)

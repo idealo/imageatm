@@ -64,8 +64,7 @@ def pipeline(
 
     validate_config(config, config.pipeline)
 
-    if not Path(config.job_dir).exists():  # type: ignore
-        Path(config.job_dir).resolve().mkdir(parents=True)  # type: ignore
+    Path(config.job_dir).resolve().mkdir(parents=True, exist_ok=True)
 
     logger = get_logger(__name__, config.job_dir)  # type: ignore
 

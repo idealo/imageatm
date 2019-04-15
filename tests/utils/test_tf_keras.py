@@ -19,8 +19,7 @@ test_samples = 20
 
 TEST_DIR = Path('tests/data/test_callbacks/').resolve()
 
-if not TEST_DIR.exists():
-    TEST_DIR.mkdir(parents=True)
+TEST_DIR.mkdir(parents=True, exist_ok=True)
 
 
 @pytest.fixture(scope='session', autouse=True)
