@@ -34,7 +34,7 @@ setup(
         'scikit-learn',
         'scipy',
         'tqdm',
-        'urlpath',
+        'yarl',
     ],
     extras_require={
         'tests': ['pytest==4.3.0', 'pytest-cov==2.6.1', 'pytest-mock', 'mock', 'mypy'],

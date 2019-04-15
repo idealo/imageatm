@@ -1,7 +1,7 @@
 import pytest
 from mock import call
 from pathlib import Path
-from urlpath import URL
+from yarl import URL
 from imageatm.components.cloud import AWS
 
 TEST_TF_DIR = Path('./tests/data/test_train_job').resolve()
