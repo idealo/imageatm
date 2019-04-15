@@ -97,7 +97,7 @@ class AWS:
         self._set_s3_dirs()
 
         # only sync if image dir is local dir
-        if isinstance(self.image_dir, Path):
+        if 's3://' not in str(self.image_dir):
             cmd = 'aws s3 sync --quiet --exclude logs {} {}'.format(
                 self.image_dir, self.s3_image_dir
             )
