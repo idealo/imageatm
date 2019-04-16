@@ -1,4 +1,3 @@
-import os
 import itertools
 import numpy as np
 import matplotlib.pyplot as plt
@@ -91,7 +90,7 @@ class Evaluation:
         job_path = self.job_dir / 'models'
         model_files = list(job_path.glob('**/*.hdf5'))
         max_acc_idx = np.argmax([m.name.split('_')[3][:5] for m in model_files])
-        self.best_model_file = str(model_files[max_acc_idx])
+        self.best_model_file = Path(model_files[max_acc_idx]).resolve()
         self.best_model = load_model(self.best_model_file)
 
         self.logger.info('loaded {}\n'.format(self.best_model_file))
@@ -99,11 +98,10 @@ class Evaluation:
     def _create_evaluation_dir(self):
         """Creates evaluation dir for reporting."""
         if self.save_plots:
-            evaluation_dir_name = os.path.basename(self.best_model_file).split('.hdf5')[0]
+            evaluation_dir_name = self.best_model_file.name.split('.hdf5')[0]
             self.evaluation_dir = self.job_dir / 'evaluation_{}'.format(evaluation_dir_name)
 
-            if not self.evaluation_dir.exists():
-                os.makedirs(self.evaluation_dir)
+            self.evaluation_dir.mkdir(parents=True, exist_ok=True)
 
     def _plot_test_set_distribution(self):
         """Plots bars with number of samples for each label in test set."""

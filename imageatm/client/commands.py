@@ -1,4 +1,3 @@
-import os
 from typing import Optional
 from pathlib import Path
 from imageatm.utils.logger import get_logger
@@ -65,8 +64,7 @@ def pipeline(
 
     validate_config(config, config.pipeline)
 
-    if not os.path.exists(config.job_dir):  # type: ignore
-        os.makedirs(config.job_dir)  # type: ignore
+    Path(config.job_dir).resolve().mkdir(parents=True, exist_ok=True)
 
     logger = get_logger(__name__, config.job_dir)  # type: ignore
 
