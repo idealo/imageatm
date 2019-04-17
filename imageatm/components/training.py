@@ -142,14 +142,19 @@ class Training:
             if self.epochs_train_dense > 0:
                 self.logger.info('\n****** Train dense layers ******\n')
 
+                min_lr = self.learning_rate_dense / 10
+                reduce_lr = ReduceLROnPlateau(
+                    monitor='val_acc', factor=0.3162, patience=5, min_lr=min_lr, verbose=1
+                )
+
                 early_stopping = EarlyStopping(
                     monitor='val_acc',
                     min_delta=0,
-                    patience=5,
+                    patience=15,
                     verbose=1,
                     mode='auto',
                     baseline=None,
-                    restore_best_weights=False,
+                    restore_best_weights=True,
                 )
 
                 # freeze convolutional layers in base net
@@ -167,7 +172,7 @@ class Training:
                     use_multiprocessing=self.use_multiprocessing,
                     workers=self.workers,
                     max_queue_size=30,
-                    callbacks=[logging_metrics, logging_models, early_stopping],
+                    callbacks=[logging_metrics, logging_models, reduce_lr, early_stopping],
                 )
 
         def _train_all_layers():
