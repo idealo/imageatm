@@ -1,20 +1,17 @@
-data_prep:
+image_dir: test_train/images
+job_dir: test_train/job_dir
+
+dataprep:
   run: False
-  samples_file: test_data_prep/samples.json
-  image_dir: test_data_prep/images
-  job_dir: test_data_prep/job_dir
+  samples_file: test_dataprep/samples.json
   resize: True
 
 train:
   run: True
   cloud: False
-  image_dir: test_train/images
-  job_dir: test_train/job_dir
 
 evaluate:
   run: False
-  image_dir: test_evaluate/images
-  job_dir: test_evaluate/job_dir
 
 cloud:
   run: False

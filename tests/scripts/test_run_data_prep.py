@@ -1,8 +1,6 @@
-import pytest
-import shutil
 from pathlib import Path
-from imageatm.scripts import run_data_prep
-from imageatm.components.data_prep import DataPrep
+from imageatm.scripts import run_dataprep
+from imageatm.components.dataprep import DataPrep
 
 TEST_IMAGE_DIR = Path('./tests/data/test_images').resolve()
 TEST_JOB_DIR = Path('./tests/data/test_train_job').resolve()
@@ -12,12 +10,12 @@ TEST_BASE_MODEL_NAME = 'MobileNet'
 
 
 class TestRunDataPrep(object):
-    def test_run_data_prep(self, mocker):
-        mp_run = mocker.patch('imageatm.components.data_prep.DataPrep.run')
-        mocker.patch('imageatm.components.data_prep.DataPrep.__init__')
+    def test_run_dataprep(self, mocker):
+        mp_run = mocker.patch('imageatm.components.dataprep.DataPrep.run')
+        mocker.patch('imageatm.components.dataprep.DataPrep.__init__')
         DataPrep.__init__.return_value = None
 
-        run_data_prep(
+        run_dataprep(
             image_dir=TEST_IMAGE_DIR, job_dir=TEST_JOB_DIR, samples_file=TEST_STR_FILE, resize=True
         )
         mp_run.assert_called_with(resize=True)
@@ -25,7 +23,7 @@ class TestRunDataPrep(object):
             image_dir=TEST_IMAGE_DIR, job_dir=TEST_JOB_DIR, samples_file=TEST_STR_FILE
         )
 
-        run_data_prep(
+        run_dataprep(
             image_dir=TEST_IMAGE_DIR,
             job_dir=TEST_JOB_DIR,
             samples_file=TEST_STR_FILE,
@@ -45,5 +43,5 @@ class TestRunDataPrep(object):
             part_size=1,
         )
 
-        run_data_prep(image_dir=TEST_IMAGE_DIR, job_dir=TEST_JOB_DIR, samples_file=TEST_STR_FILE)
+        run_dataprep(image_dir=TEST_IMAGE_DIR, job_dir=TEST_JOB_DIR, samples_file=TEST_STR_FILE)
         mp_run.assert_called_with(resize=False)

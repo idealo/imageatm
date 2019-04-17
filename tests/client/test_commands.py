@@ -10,7 +10,8 @@ p = Path(__file__)
 TEST_CONFIG_FILE = p.resolve().parent / 'test_configs' / 'config_train.yml'
 
 # TODO: Add relative path
-TEST_JOB_DIR = 'test_data_prep'
+TEST_JOB_DIR = 'test_dataprep'
+
 
 @pytest.fixture(scope='session', autouse=True)
 def tear_down(request):
@@ -19,8 +20,9 @@ def tear_down(request):
 
     request.addfinalizer(remove_job_dir)
 
+
 def mock_scripts(mocker):
-    m_dp = mocker.patch('imageatm.scripts.run_data_prep')
+    m_dp = mocker.patch('imageatm.scripts.run_dataprep')
     m_tc = mocker.patch('imageatm.scripts.run_training_cloud')
     m_t = mocker.patch('imageatm.scripts.run_training')
     m_e = mocker.patch('imageatm.scripts.run_evaluation')
@@ -34,8 +36,8 @@ def mock_scripts(mocker):
 
 
 def test_pipeline(mocker):
-    # assert that only data_prep gets run
-    TEST_CONFIG_FILE = p.resolve().parent / 'test_configs' / 'config_data_prep.yml'
+    # assert that only dataprep gets run
+    TEST_CONFIG_FILE = p.resolve().parent / 'test_configs' / 'config_dataprep.yml'
 
     config = Config()
 
