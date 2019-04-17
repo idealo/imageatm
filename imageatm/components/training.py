@@ -119,14 +119,13 @@ class Training:
         )
 
         # TODO: initialize callbacks TensorBoardBatch
-        # tensorboard = TensorBoardBatch(log_dir=os.path.join(job_dir, 'logs'))
+        # tensorboard = TensorBoardBatch(log_dir=Path(job_dir).resolve() / 'logs')
 
         model_save_name = (
             'model_' + self.base_model_name.lower() + '_{epoch:02d}_{val_acc:.3f}.hdf5'
         )
         model_dir = self.job_dir / 'models'
-        if not model_dir.is_dir():
-            os.makedirs(model_dir)
+        model_dir.mkdir(parents=True, exist_ok=True)
 
         logging_metrics = LoggingMetrics(logger=self.logger)
         logging_models = LoggingModels(

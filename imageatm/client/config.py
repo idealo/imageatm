@@ -6,7 +6,7 @@ from imageatm.utils.io import load_yaml
 class Config:
     def __init__(self) -> None:
         # components
-        self.data_prep: dict = {}
+        self.dataprep: dict = {}
         self.train: dict = {}
         self.cloud: dict = {}
         self.evaluate: dict = {}
@@ -18,45 +18,15 @@ class Config:
         self.pipeline: list = []
 
 
-# set job_dir if not already set by client option
-def config_set_job_dir(config: Config) -> Config:
-    if config.job_dir is None:
-        if config.data_prep.get('job_dir') and config.data_prep.get('run'):
-            config.job_dir = config.data_prep.get('job_dir')
-
-        elif config.train.get('job_dir') and config.train.get('run'):
-            config.job_dir = config.train.get('job_dir')
-
-        elif config.evaluate.get('job_dir') and config.evaluate.get('run'):
-            config.job_dir = config.evaluate.get('job_dir')
-
-    return config
-
-
-def config_set_image_dir(config: Config) -> Config:
-    # set image_dir if not already set by client option
-    if config.image_dir is None:
-        if config.data_prep.get('image_dir') and config.data_prep.get('run'):
-            config.image_dir = config.data_prep.get('image_dir')
-
-        elif config.train.get('image_dir') and config.train.get('run'):
-            config.image_dir = config.train.get('image_dir')
-
-        elif config.evaluate.get('image_dir') and config.evaluate.get('run'):
-            config.image_dir = config.evaluate.get('image_dir')
-
-    return config
-
-
 def update_component_configs(config: Config) -> Config:
     """Populate central parameters to component configs."""
     if config.image_dir:
-        config.data_prep['image_dir'] = config.image_dir
+        config.dataprep['image_dir'] = config.image_dir
         config.train['image_dir'] = config.image_dir
         config.evaluate['image_dir'] = config.image_dir
 
     if config.job_dir:
-        config.data_prep['job_dir'] = config.job_dir
+        config.dataprep['job_dir'] = config.job_dir
         config.train['job_dir'] = config.job_dir
         config.evaluate['job_dir'] = config.job_dir
         config.cloud['job_dir'] = config.job_dir
@@ -91,7 +61,8 @@ def update_config(
 
     # set defaults
     config.train['cloud'] = False
-    config.data_prep['resize'] = False
+    config.dataprep['resize'] = False
+    config.pipeline = []
 
     # load central config file
     if config_file:
@@ -99,13 +70,17 @@ def update_config(
 
         # populate parameters from config file
         # parameters from config file overwrite defaults
-        config.data_prep = {**config.data_prep, **config_yml.get('data_prep', {})}
+        config.image_dir = config_yml.get('image_dir')
+        config.job_dir = config_yml.get('job_dir')
+
+        config.dataprep = {**config.dataprep, **config_yml.get('dataprep', {})}
         config.train = {**config.train, **config_yml.get('train', {})}
         config.evaluate = {**config.evaluate, **config_yml.get('evaluate', {})}
         config.cloud = {**config.cloud, **config_yml.get('cloud', {})}
 
         # set pipeline
-        config.pipeline = [i for (i, j) in config_yml.items() if j.get('run')]
+        components = ['dataprep', 'train', 'evaluate', 'cloud']
+        config.pipeline = [i for i in components if config_yml.get(i, {}).get('run')]
 
     # set options
     if job_dir is not None:
@@ -115,7 +90,7 @@ def update_config(
         config.image_dir = image_dir
 
     if samples_file is not None:
-        config.data_prep['samples_file'] = samples_file
+        config.dataprep['samples_file'] = samples_file
 
     if provider is not None:
         config.cloud['provider'] = provider
@@ -145,7 +120,7 @@ def update_config(
         config.cloud['destroy'] = False
 
     if resize is True:
-        config.data_prep['resize'] = True
+        config.dataprep['resize'] = True
 
     if batch_size is not None:
         config.train['batch_size'] = batch_size
@@ -196,11 +171,11 @@ def get_diff(
     return msg
 
 
-def val_data_prep(config: dict) -> List[str]:
+def val_dataprep(config: dict) -> List[str]:
     required_keys = ['image_dir', 'job_dir', 'samples_file', 'run']
     optional_keys = ['resize']
 
-    return get_diff('data_prep', config, required_keys, optional_keys)
+    return get_diff('dataprep', config, required_keys, optional_keys)
 
 
 def val_train(config: dict) -> List[str]:
@@ -262,8 +237,8 @@ def validate_config(config: Config, components: Optional[list]):
         for component in components:
             config_component = getattr(config, component)
 
-            if component == 'data_prep':
-                msgs += val_data_prep(config_component)
+            if component == 'dataprep':
+                msgs += val_dataprep(config_component)
 
             if component == 'train':
                 msgs += val_train(config_component)

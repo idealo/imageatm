@@ -54,7 +54,7 @@ def test_options_available():
         '  --tf-dir TEXT                 Directory with Terraform configs [aws].\n'
         '  --train-cloud                 Run training in cloud [aws].\n'
         '  --destroy                     Destroys cloud.\n'
-        '  --resize                      Resizes images in data_prep.\n'
+        '  --resize                      Resizes images in dataprep.\n'
         '  --batch-size INTEGER          Batch size.\n'
         '  --epochs-train-dense INTEGER  Number of epochs train only dense layer.\n'
         '  --epochs-train-all INTEGER    Number of epochs train all layers.\n'

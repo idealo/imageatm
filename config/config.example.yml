@@ -1,8 +1,9 @@
-data_prep:
+image_dir: sample_dataset/
+job_dir: sample_jobdir/
+
+dataprep:
   run: True
   samples_file: sample_configfile.json
-  image_dir: sample_dataset/
-  job_dir: sample_jobdir/
   resize: True
 
 train:

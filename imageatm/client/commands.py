@@ -1,15 +1,7 @@
-import os
 from typing import Optional
 from pathlib import Path
 from imageatm.utils.logger import get_logger
-from imageatm.client.config import (
-    Config,
-    validate_config,
-    update_config,
-    update_component_configs,
-    config_set_image_dir,
-    config_set_job_dir,
-)
+from imageatm.client.config import Config, validate_config, update_config, update_component_configs
 
 
 def pipeline(
@@ -59,19 +51,15 @@ def pipeline(
         base_model_name=base_model_name,
         cloud_tag=cloud_tag,
     )
-    config = config_set_image_dir(config)
-    config = config_set_job_dir(config)
-    config = update_component_configs(config)
 
     validate_config(config, config.pipeline)
 
-    if not os.path.exists(config.job_dir):  # type: ignore
-        os.makedirs(config.job_dir)  # type: ignore
+    Path(config.job_dir).resolve().mkdir(parents=True, exist_ok=True)
 
     logger = get_logger(__name__, config.job_dir)  # type: ignore
 
-    if 'data_prep' in config.pipeline:
-        from imageatm.scripts import run_data_prep
+    if 'dataprep' in config.pipeline:
+        from imageatm.scripts import run_dataprep
 
         logger.info(
             '\n********************************\n'
@@ -79,10 +67,10 @@ def pipeline(
             '********************************'
         )
 
-        dp = run_data_prep(**config.data_prep)
+        dp = run_dataprep(**config.dataprep)
 
         # update image_dir if images were resized
-        if config.data_prep.get('resize', False):
+        if config.dataprep.get('resize', False):
             config.image_dir = dp.image_dir  # type: ignore
             config = update_component_configs(config)
 
@@ -136,12 +124,12 @@ def dataprep(
         resize=resize,
     )
 
-    config.data_prep['run'] = True
-    validate_config(config, ['data_prep'])
+    config.dataprep['run'] = True
+    validate_config(config, ['dataprep'])
 
-    from imageatm.scripts import run_data_prep
+    from imageatm.scripts import run_dataprep
 
-    run_data_prep(**config.data_prep)
+    run_dataprep(**config.dataprep)
 
 
 def train(
