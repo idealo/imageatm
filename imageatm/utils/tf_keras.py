@@ -7,10 +7,11 @@ from tensorflow.python.client import device_lib
 from keras.models import load_model as load_model_keras
 from keras.callbacks import Callback
 from keras.engine.training import Model
+from pathlib import Path
 
 
-def load_model(model_path: str) -> Model:
-    return load_model_keras(model_path)
+def load_model(model_path: Path) -> Model:
+    return load_model_keras(str(model_path))
 
 
 def use_multiprocessing() -> Tuple[bool, int]:
@@ -55,7 +56,7 @@ class LoggingMetrics(Callback):
 class LoggingModels(Callback):
     def __init__(
         self,
-        filepath: str,
+        filepath: Path,
         logger: Logger,
         monitor: str = 'val_loss',
         verbose: int = 0,
@@ -98,7 +99,7 @@ class LoggingModels(Callback):
         self.epochs_since_last_save += 1
         if self.epochs_since_last_save >= self.period:
             self.epochs_since_last_save = 0
-            filepath = self.filepath.format(epoch=epoch + 1, **logs)
+            filepath = Path(str(self.filepath).format(epoch=epoch + 1, **logs))
             if self.save_best_only:
                 current = logs.get(self.monitor)
                 if current is None:
@@ -115,9 +116,9 @@ class LoggingModels(Callback):
                             )
                         self.best = current
                         if self.save_weights_only:
-                            self.model.save_weights(filepath, overwrite=True)
+                            self.model.save_weights(str(filepath), overwrite=True)
                         else:
-                            self.model.save(filepath, overwrite=True)
+                            self.model.save(str(filepath), overwrite=True)
                     else:
                         if self.verbose > 0:
                             self.logger.info(
@@ -131,6 +132,6 @@ class LoggingModels(Callback):
                         '\nEpoch {:05d} saving model to {}'.format(epoch + 1, filepath)
                     )
                 if self.save_weights_only:
-                    self.model.save_weights(filepath, overwrite=True)
+                    self.model.save_weights(str(filepath), overwrite=True)
                 else:
-                    self.model.save(filepath, overwrite=True)
+                    self.model.save(str(filepath), overwrite=True)
