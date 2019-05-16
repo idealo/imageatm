@@ -1,4 +1,3 @@
-import os
 import typing
 import tensorflow as tf
 from keras import backend as K
@@ -17,10 +16,10 @@ BATCH_SIZE = 64
 DROPOUT_RATE = 0.75
 BASE_MODEL_NAME = 'MobileNet'
 LOSS = 'categorical_crossentropy'
-EPOCHS_TRAIN_DENSE = 2
-EPOCHS_TRAIN_ALL = 10
+EPOCHS_TRAIN_DENSE = 100
+EPOCHS_TRAIN_ALL = 100
 LEARNING_RATE_DENSE = 0.001
-LEARNING_RATE_ALL = 0.0001
+LEARNING_RATE_ALL = 0.0003
 
 
 class Training:
@@ -41,14 +40,33 @@ class Training:
     - DenseNet121, DenseNet169, DenseNet201
     - NASNetLarge, NASNetMobile
 
+    Training is split into two phases, at first only the last dense layer gets
+    trained, and then all layers are trained. The maximum number of epochs for
+    each phase is set by *epochs_train_dense* (default: 100) and
+    *epochs_train_all* (default: 100), respectively. Similarly,
+    *learning_rate_dense* (default: 0.001) and *learning_rate_all*
+    (default: 0.0003) can be set.
+
+    For each phase the learning rate is reduced after a patience period if no
+    improvement in validation accuracy has been observed. The patience period
+    depends on the average number of samples per class:
+
+    - if n_per_class < 200: patience = 5 epochs
+    - if n_per_class >= 200 and < 500: patience = 4 epochs
+    - if n_per_class >= 500: patience = 2 epochs
+
+    The training is stopped early after a patience period that is three times
+    the learning rate patience to allow for two learning rate adjustments
+    with no validation accuracy improvement before stopping training.
+
     Attributes:
         image_dir: Directory with images used for training.
         job_dir: Directory with train_samples.json, val_samples.json,
                  and class_mapping.json.
-        epochs_train_dense: Maximum number of epochs to train dense layers (default 2).
-        epochs_train_all: Maximum number of epochs to train all layers (default 10).
+        epochs_train_dense: Maximum number of epochs to train dense layers (default 100).
+        epochs_train_all: Maximum number of epochs to train all layers (default 100).
         learning_rate_dense: Learning rate for dense training phase (default 0.001).
-        learning_rate_all: Learning rate for all training phase (default 0.0001).
+        learning_rate_all: Learning rate for all training phase (default 0.0003).
         batch_size: Number of images per batch (default 64).
         dropout_rate: Fraction of nodes before output layer set to random value (default 0.75).
         base_model_name: Name of pretrained CNN (default MobileNet).
@@ -137,19 +155,41 @@ class Training:
             save_weights_only=False,
         )
 
+        def _set_patience():
+            """Adjust patience for early stopping and learning rate schedule
+            based on training set size.
+            """
+            n_per_class = int(len(self.samples_train) / self.n_classes)
+
+            self.patience_learning_rate = 5
+            if n_per_class >= 200:
+                self.patience_learning_rate = 4
+
+            if n_per_class >= 500:
+                self.patience_learning_rate = 2
+
+            self.patience_early_stopping = 3 * self.patience_learning_rate
+
+            self.logger.info('Early stopping patience: {}'.format(self.patience_early_stopping))
+            self.logger.info('Learning rate patience: {}'.format(self.patience_learning_rate))
+
         def _train_dense_layers():
             if self.epochs_train_dense > 0:
                 self.logger.info('\n****** Train dense layers ******\n')
 
                 min_lr = self.learning_rate_dense / 10
                 reduce_lr = ReduceLROnPlateau(
-                    monitor='val_acc', factor=0.3162, patience=5, min_lr=min_lr, verbose=1
+                    monitor='val_acc',
+                    factor=0.3162,
+                    patience=self.patience_learning_rate,
+                    min_lr=min_lr,
+                    verbose=1,
                 )
 
                 early_stopping = EarlyStopping(
                     monitor='val_acc',
-                    min_delta=0,
-                    patience=15,
+                    min_delta=0.002,
+                    patience=self.patience_early_stopping,
                     verbose=1,
                     mode='auto',
                     baseline=None,
@@ -180,13 +220,17 @@ class Training:
 
                 min_lr = self.learning_rate_all / 10
                 reduce_lr = ReduceLROnPlateau(
-                    monitor='val_acc', factor=0.3162, patience=5, min_lr=min_lr, verbose=1
+                    monitor='val_acc',
+                    factor=0.3162,
+                    patience=self.patience_learning_rate,
+                    min_lr=min_lr,
+                    verbose=1,
                 )
 
                 early_stopping = EarlyStopping(
                     monitor='val_acc',
-                    min_delta=0,
-                    patience=15,
+                    min_delta=0.002,
+                    patience=self.patience_early_stopping,
                     verbose=1,
                     mode='auto',
                     baseline=None,
@@ -214,6 +258,7 @@ class Training:
                     callbacks=[logging_metrics, logging_models, reduce_lr, early_stopping],
                 )
 
+        _set_patience()
         _train_dense_layers()
         _train_all_layers()
 
@@ -221,15 +266,6 @@ class Training:
 
     def run(self):
         """Builds the model and runs training.
-
-        Training is split into two phases, at first only the last dense layer gets
-        trained, and then all layers are trained.
-
-        The maximum number of epochs for each phase is set by *epochs_train_dense* and *epochs_train_all*,
-        respectively. Similarly, *learning_rate_dense* and *learning_rate_all* can be set.
-
-        For each phase the learning rate is reduced after five consecutive epochs with no improvement in validation accuracy.
-        The training is stopped early after 15 consecutive epochs with no improvement in validation accuracy.
         """
         self._build_model()
         self._fit_model()
