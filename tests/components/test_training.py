@@ -35,7 +35,7 @@ class TestTraining(object):
         train = Training(image_dir=TEST_IMAGE_DIR, job_dir=TEST_JOB_DIR)
 
         assert train.n_classes == 2
-        assert train.epochs_train_dense == 2
+        assert train.epochs_train_dense == 100
 
     def test__build_model(self):
         global train
