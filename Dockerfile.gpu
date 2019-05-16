@@ -27,7 +27,8 @@ RUN /bin/bash -c "source ~/.venvs/image-atm/bin/activate && pip install \
   python-dateutil \
   scikit-learn \
   scipy \
-  tqdm"
+  tqdm \
+  yarl"
 
 WORKDIR /root/repo
 
