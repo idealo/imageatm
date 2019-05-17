@@ -43,8 +43,8 @@ Run the data preparation:
 from imageatm.components import DataPrep
 
 dp = DataPrep(
-    image_dir = 'sample_dataset/',
     samples_file = 'sample_configfile.json',
+    image_dir = 'sample_dataset/',
     job_dir='sample_jobdir/'
 )
 dp.run(resize=True)
@@ -54,7 +54,7 @@ Run the training:
 ``` python
 from imageatm.components import Training
 
-trainer = Training(dp.image_dir, dp.job_dir)
+trainer = Training(image_dir=dp.image_dir, job_dir=dp.job_dir)
 trainer.run()
 ```
 
@@ -62,8 +62,8 @@ Run the evaluation:
 ``` python
 from imageatm.components import Evaluation
 
-evaluater = Evaluation(image_dir=dp.image_dir, job_dir=dp.job_dir)
-evaluater.run()
+evaluator = Evaluation(image_dir=dp.image_dir, job_dir=dp.job_dir)
+evaluator.run()
 ```
 
 ## Transfer learning
