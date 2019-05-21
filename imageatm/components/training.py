@@ -109,6 +109,24 @@ class Training:
         self.loss = loss
         self.use_multiprocessing, self.workers = use_multiprocessing()
 
+    def _set_patience(self):
+        """Adjust patience for early stopping and learning rate schedule
+        based on training set size.
+        """
+        n_per_class = int(len(self.samples_train) / self.n_classes)
+
+        self.patience_learning_rate = 5
+        if n_per_class >= 200:
+            self.patience_learning_rate = 4
+
+        if n_per_class >= 500:
+            self.patience_learning_rate = 2
+
+        self.patience_early_stopping = 3 * self.patience_learning_rate
+
+        self.logger.info('Early stopping patience: {}'.format(self.patience_early_stopping))
+        self.logger.info('Learning rate patience: {}'.format(self.patience_learning_rate))
+
     def _build_model(self):
         self.classifier = ImageClassifier(
             self.base_model_name,
@@ -154,24 +172,6 @@ class Training:
             save_best_only=True,
             save_weights_only=False,
         )
-
-        def _set_patience():
-            """Adjust patience for early stopping and learning rate schedule
-            based on training set size.
-            """
-            n_per_class = int(len(self.samples_train) / self.n_classes)
-
-            self.patience_learning_rate = 5
-            if n_per_class >= 200:
-                self.patience_learning_rate = 4
-
-            if n_per_class >= 500:
-                self.patience_learning_rate = 2
-
-            self.patience_early_stopping = 3 * self.patience_learning_rate
-
-            self.logger.info('Early stopping patience: {}'.format(self.patience_early_stopping))
-            self.logger.info('Learning rate patience: {}'.format(self.patience_learning_rate))
 
         def _train_dense_layers():
             if self.epochs_train_dense > 0:
@@ -258,7 +258,7 @@ class Training:
                     callbacks=[logging_metrics, logging_models, reduce_lr, early_stopping],
                 )
 
-        _set_patience()
+        self._set_patience()
         _train_dense_layers()
         _train_all_layers()
 
