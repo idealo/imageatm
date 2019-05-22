@@ -26,7 +26,7 @@ RUN /bin/bash -c "source ~/.venvs/image-atm/bin/activate && pip install \
   Pillow \
   python-dateutil \
   scikit-learn \
-  scipy \
+  scipy==1.1.* \
   tqdm \
   yarl"
 
