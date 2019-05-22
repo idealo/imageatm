@@ -35,7 +35,35 @@ class TestTraining(object):
         train = Training(image_dir=TEST_IMAGE_DIR, job_dir=TEST_JOB_DIR)
 
         assert train.n_classes == 2
-        assert train.epochs_train_dense == 2
+        assert train.epochs_train_dense == 100
+
+    def test__set_patience(self):
+        global train
+
+        n_per_class = int(len(train.samples_train) / train.n_classes)
+
+        assert n_per_class == 2
+
+        train._set_patience()
+
+        assert train.patience_learning_rate == 5
+        assert train.patience_early_stopping == 15
+
+        train_400 = train
+        train_400.samples_train = train_400.samples_train * 100
+
+        train_400._set_patience()
+
+        assert train_400.patience_learning_rate == 4
+        assert train_400.patience_early_stopping == 12
+
+        train_2000 = train
+        train_2000.samples_train = train_2000.samples_train * 1000
+
+        train_2000._set_patience()
+
+        assert train_2000.patience_learning_rate == 2
+        assert train_2000.patience_early_stopping == 6
 
     def test__build_model(self):
         global train

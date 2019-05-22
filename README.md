@@ -43,8 +43,8 @@ Run the data preparation:
 from imageatm.components import DataPrep
 
 dp = DataPrep(
-    image_dir = 'sample_dataset/',
     samples_file = 'sample_configfile.json',
+    image_dir = 'sample_dataset/',
     job_dir='sample_jobdir/'
 )
 dp.run(resize=True)
@@ -54,7 +54,7 @@ Run the training:
 ``` python
 from imageatm.components import Training
 
-trainer = Training(dp.image_dir, dp.job_dir)
+trainer = Training(image_dir=dp.image_dir, job_dir=dp.job_dir)
 trainer.run()
 ```
 
@@ -62,9 +62,40 @@ Run the evaluation:
 ``` python
 from imageatm.components import Evaluation
 
-evaluater = Evaluation(image_dir=dp.image_dir, job_dir=dp.job_dir)
-evaluater.run()
+evaluator = Evaluation(image_dir=dp.image_dir, job_dir=dp.job_dir)
+evaluator.run()
 ```
+
+## Transfer learning
+The following pretrained CNNs from Keras can be used for transfer learning in Image-ATM:
+
+- Xception
+- VGG16
+- VGG19
+- ResNet50, ResNet101, ResNet152
+- ResNet50V2, ResNet101V2, ResNet152V2
+- ResNeXt50, ResNeXt101
+- InceptionV3
+- InceptionResNetV2
+- MobileNet
+- MobileNetV2
+- DenseNet121, DenseNet169, DenseNet201
+- NASNetLarge, NASNetMobile
+
+Training is split into two phases, at first only the last dense layer gets
+trained, and then all layers are trained.
+
+For each phase the **learning rate is reduced** after a patience period if no
+improvement in validation accuracy has been observed. The patience period
+depends on the average number of samples per class (*n_per_class*):
+
+- if *n_per_class* < 200: patience = 5 epochs
+- if *n_per_class* >= 200 and < 500: patience = 4 epochs
+- if *n_per_class* >= 500: patience = 2 epochs
+
+**Training is stopped early** after a patience period that is three times
+the learning rate patience to allow for two learning rate adjustments
+before stopping training.
 
 ## Cite this work
 Please cite Image ATM in your publications if this is useful for your research. Here is an example BibTeX entry:

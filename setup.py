@@ -32,7 +32,7 @@ setup(
         'matplotlib',
         'Pillow',
         'scikit-learn',
-        'scipy',
+        'scipy==1.1.*',
         'tqdm',
         'yarl',
     ],
