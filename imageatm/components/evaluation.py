@@ -183,11 +183,15 @@ class Evaluation:
         )
         self.logger.info(cr)
 
-    def _plot_confusion_matrix(self):
+    def _plot_confusion_matrix(self, transposed=False):
         """Plots normalized confusion matrix."""
-        self.logger.info('\n****** Plot confusion matrix ******\n')
+        (title, xlabel, ylabel, filename) = \
+            ('Confusion matrix (precision)', 'True label', 'Predicted label', 'confusion_matrix_precision.pdf') if transposed \
+            else ('Confusion matrix (recall)', 'Predicted label', 'True label', 'confusion_matrix_recall.pdf')
+        self.logger.info('\n****** Plot ' + title + ' ******\n')
 
-        cm = confusion_matrix(y_true=self.y_true, y_pred=self.y_pred)
+        cm = confusion_matrix(y_true=self.y_pred, y_pred=self.y_true) if transposed \
+            else confusion_matrix(y_true=self.y_true, y_pred=self.y_pred)
         cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
 
         figsize = [min(15, self.n_classes * 3.5), min(15, self.n_classes * 3.5)]
@@ -196,13 +200,13 @@ class Evaluation:
 
         plt.figure(figsize=figsize)
         plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
-        plt.title('Confusion matrix', fontsize=title_fontsize)
+        plt.title(title, fontsize=title_fontsize)
         plt.colorbar()
         tick_marks = np.arange(self.n_classes)
         plt.xticks(tick_marks, self.classes, rotation=45, fontsize=text_fontsize)
         plt.yticks(tick_marks, self.classes, fontsize=text_fontsize)
-        plt.ylabel('True label', fontsize=text_fontsize)
-        plt.xlabel('Predicted label', fontsize=text_fontsize)
+        plt.xlabel(xlabel, fontsize=text_fontsize)
+        plt.ylabel(ylabel, fontsize=text_fontsize)
 
         thresh = cm.max() / 2.0
         for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
@@ -218,7 +222,7 @@ class Evaluation:
         plt.tight_layout()
 
         if self.save_plots:
-            target_file = self.evaluation_dir / 'confusion_matrix.pdf'
+            target_file = self.evaluation_dir / filename
             plt.savefig(target_file)
             self.logger.info('saved under {}'.format(target_file))
 
@@ -238,6 +242,7 @@ class Evaluation:
         self._make_prediction_on_test_set()
         self._calc_classification_report()
         self._plot_confusion_matrix()
+        self._plot_confusion_matrix(transposed=True)
 
     # TO-DO: Enforce string or integer but not both at the same time
     def get_correct_wrong_examples(
