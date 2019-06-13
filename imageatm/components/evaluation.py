@@ -61,6 +61,9 @@ class Evaluation:
         self.classes = [str(self.class_mapping[str(i)]) for i in range(self.n_classes)]
         self.y_true = np.array([i['label'] for i in self.samples_test])
 
+        self.title_fontsize = 16 if self.n_classes < 4 else 18
+        self.text_fontsize = 12 if self.n_classes < 4 else 14
+
         self._determine_plot_params()
         self._load_best_model()
         self._create_evaluation_dir()
@@ -261,13 +264,24 @@ class Evaluation:
         if self.show_plots:
             plt.show()
 
+    def _plot_correct_wrong_examples(self, n_plot: int = 5):
+        """Plots correct and wrong examples for each label in test set."""
+        self.logger.info('\n****** Plot correct and wrong examples ******\n')
+        for i in range(len(self.classes)):
+            c, w = self.get_correct_wrong_examples(label=i)
+            filename = '{}_correct.pdf'.format(self.classes[i])
+            self.visualize_images(c, title='{} (correct)'.format(self.classes[i]), filename=filename, show_heatmap=True, n_plot=n_plot)
+            filename = '{}_wrong.pdf'.format(self.classes[i])
+            self.visualize_images(w, title='{} (wrong)'.format(self.classes[i]), filename=filename, show_heatmap=True, n_plot=n_plot)
+
     def run(self):
         """Runs evaluation pipeline on the best model found in job directory for the specific test set:
 
-            - Plots test set distribution
             - Makes prediction on test set
-            - Calculates classification report (accuracy, precision, recall)
-            - Plots confusion matrix
+            - Plots test set distribution
+            - Plots classification report (accuracy, precision, recall)
+            - Plots confusion matrix (on precsion and on recall)
+            - Plots correct and wrong examples
         """
 
         self._make_prediction_on_test_set()
@@ -275,6 +289,7 @@ class Evaluation:
         self._plot_classification_report()
         self._plot_confusion_matrix()
         self._plot_confusion_matrix(transposed=True)
+        self._plot_correct_wrong_examples(n_plot=3)
 
     # TO-DO: Enforce string or integer but not both at the same time
     def get_correct_wrong_examples(
@@ -307,7 +322,7 @@ class Evaluation:
 
     # visualize misclassified images:
     def visualize_images(
-        self, image_list: TYPE_IMAGE_LIST, show_heatmap: bool = False, n_plot: int = 20
+        self, image_list: TYPE_IMAGE_LIST, title: str, filename: str, show_heatmap: bool = False, n_plot: int = 20
     ):
         """Visualizes images in a sample list.
 
@@ -325,6 +340,7 @@ class Evaluation:
 
             figsize = [5 * n_cols, 5 * n_rows]
             plt.figure(figsize=figsize)
+            plt.suptitle(title, fontsize=self.title_fontsize)
 
             plot_count = 1
             for (i, img, sample) in image_list[:n_rows]:
@@ -357,7 +373,7 @@ class Evaluation:
 
         if self.save_plots:
             # TODO: pass name as argument
-            target_file = self.evaluation_dir / 'misclassified_images.pdf'
+            target_file = self.evaluation_dir / filename
             plt.savefig(target_file)
             self.logger.info('saved under {}'.format(target_file))
 
