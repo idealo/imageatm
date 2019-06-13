@@ -93,7 +93,7 @@ class Evaluation:
         self.best_model_file = Path(model_files[max_acc_idx]).resolve()
         self.best_model = load_model(self.best_model_file)
 
-        self.logger.info('loaded {}\n'.format(self.best_model_file))
+        self.logger.info('loaded {}'.format(self.best_model_file))
 
     def _create_evaluation_dir(self):
         """Creates evaluation dir for reporting."""
@@ -169,19 +169,50 @@ class Evaluation:
         self.y_pred = np.argmax(predictions_dist, axis=1)
         self.y_pred_prob = self._get_probabilities_prediction(predictions_dist=predictions_dist)
 
-    def _calc_classification_report(self):
-        """Calculates classification report on prediction on test set."""
-        self.logger.info('\n****** Calculate classification report ******\n')
+    def _plot_classification_report(self, title='Classification report ', with_avg_total=False, cmap=plt.cm.Blues):
+        """Plots classification report on prediction on test set."""
+        self.logger.info('\n****** Plot classification report ******\n')
 
         self.accuracy = accuracy_score(y_true=self.y_true, y_pred=self.y_pred)
         self.logger.info(
-            '\nModel achieves {}% accuracy on test set\n'.format(round(self.accuracy * 100, 2))
+            'Model achieves {}% accuracy on test set\n'.format(round(self.accuracy * 100, 2))
         )
 
         cr = classification_report(
-            y_true=self.y_true, y_pred=self.y_pred, target_names=self.classes
+            y_true=self.y_true, y_pred=self.y_pred, target_names=self.classes, output_dict=True
         )
-        self.logger.info(cr)
+
+        classes = list(cr.keys())
+        metrics = ['precision', 'recall', 'f1-score']
+        plotMat = []
+        for c in classes:
+            plotMat.append(list(cr[c].values())[:3])
+
+        figsize = [5, 10]
+        title_fontsize = 16 if self.n_classes < 4 else 18
+        text_fontsize = 12 if self.n_classes < 4 else 14
+
+        plt.clf()
+        plt.figure(figsize=figsize)
+        plt.imshow(plotMat, interpolation='nearest', cmap=cmap)
+        plt.title(title, fontsize=title_fontsize)
+        plt.colorbar()
+        x_tick_marks = np.arange(3)
+        y_tick_marks = np.arange(len(classes))
+        plt.xticks(x_tick_marks, metrics, rotation=45, fontsize=text_fontsize)
+        plt.yticks(y_tick_marks, classes, fontsize=text_fontsize)
+        plt.ylabel('Classes', fontsize=text_fontsize)
+        plt.xlabel('Measures', fontsize=text_fontsize)
+        plt.tight_layout()
+
+
+        if self.save_plots:
+            target_file = self.evaluation_dir / 'classification_report.pdf'
+            plt.savefig(target_file)
+            self.logger.info('saved under {}'.format(target_file))
+
+        if self.show_plots:
+            plt.show()
 
     def _plot_confusion_matrix(self, transposed=False):
         """Plots normalized confusion matrix."""
@@ -198,6 +229,7 @@ class Evaluation:
         title_fontsize = 16 if self.n_classes < 4 else 18
         text_fontsize = 12 if self.n_classes < 4 else 14
 
+        plt.clf()
         plt.figure(figsize=figsize)
         plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
         plt.title(title, fontsize=title_fontsize)
@@ -238,9 +270,9 @@ class Evaluation:
             - Plots confusion matrix
         """
 
-        self._plot_test_set_distribution()
         self._make_prediction_on_test_set()
-        self._calc_classification_report()
+        self._plot_test_set_distribution()
+        self._plot_classification_report()
         self._plot_confusion_matrix()
         self._plot_confusion_matrix(transposed=True)
 
