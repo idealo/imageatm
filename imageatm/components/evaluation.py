@@ -70,8 +70,9 @@ class Evaluation:
 
         Plots will only be shown if in ipython, otherwise saved as files.
         """
-        self.title_fontsize = 16 if self.n_classes < 4 else 18
-        self.text_fontsize = 12 if self.n_classes < 4 else 14
+        self.fontsize_title = 16 if self.n_classes < 4 else 18
+        self.fontsize_label = 12 if self.n_classes < 4 else 14
+        self.fontsize_ticks = 9 if self.n_classes < 4 else 12
 
         try:
             __IPYTHON__
@@ -148,18 +149,18 @@ class Evaluation:
         """Plots bars with number of samples for each label in test set."""
         self.logger.info('\n****** Calculate distribution on test set ******\n')
 
-        counts = np.bincount(self.y_true)
         title = 'Number of images in test set: {}'.format(len(self.samples_test))
-        index = np.arange(self.n_classes)
-
-        plt.bar(index, counts)
-        plt.xlabel('Label', fontsize=self.text_fontsize)
-        plt.ylabel('Number of images', fontsize=self.text_fontsize)
-        plt.xticks(index, self.classes, fontsize=self.text_fontsize, rotation=30)
-        plt.title(title, fontsize=self.title_fontsize)
+        x_tick_marks = np.arange(self.n_classes)
+        y_values = np.bincount(self.y_true)
 
         # figsize = [min(15, self.n_classes * 2), 5]
         # plt.figure(figsize=figsize)
+
+        plt.bar(x_tick_marks, y_values)
+        plt.title(title, fontsize=self.fontsize_title)
+        plt.xlabel('Label', fontsize=self.fontsize_label)
+        plt.ylabel('Number of images', fontsize=self.fontsize_label)
+        plt.xticks(x_tick_marks, self.classes, fontsize=self.fontsize_ticks, rotation=30)
         plt.tight_layout()
 
         if self.save_plots:
@@ -191,18 +192,31 @@ class Evaluation:
             plotMat.append(list(cr[c].values())[:3])
 
         figsize = [5, 10]
+        plotMatArray = np.asarray(plotMat)
+        x_tick_marks = np.arange(3)
+        y_tick_marks = np.arange(len(classes))
 
         plt.clf()
         plt.figure(figsize=figsize)
-        plt.imshow(plotMat, interpolation='nearest', cmap=plt.cm.Blues)
-        plt.title('Classification report', fontsize=self.title_fontsize)
+        plt.imshow(plotMatArray, interpolation='nearest', cmap=plt.cm.Blues)
         plt.colorbar()
-        x_tick_marks = np.arange(3)
-        y_tick_marks = np.arange(len(classes))
-        plt.xticks(x_tick_marks, metrics, rotation=45, fontsize=self.text_fontsize)
-        plt.yticks(y_tick_marks, classes, fontsize=self.text_fontsize)
-        plt.ylabel('Classes', fontsize=self.text_fontsize)
-        plt.xlabel('Measures', fontsize=self.text_fontsize)
+        plt.title('Classification report', fontsize=self.fontsize_title)
+        plt.xlabel('Measures', fontsize=self.fontsize_label)
+        plt.ylabel('Classes', fontsize=self.fontsize_label)
+        plt.xticks(x_tick_marks, metrics, rotation=45, fontsize=self.fontsize_ticks)
+        plt.yticks(y_tick_marks, classes, fontsize=self.fontsize_ticks)
+
+        thresh = plotMatArray.max() / 2.0
+        for i, j in itertools.product(range(plotMatArray.shape[0]), range(plotMatArray.shape[1])):
+            plt.text(
+                j,
+                i,
+                '{:.2f}'.format(plotMatArray[i, j]),
+                horizontalalignment='center',
+                color='white' if plotMatArray[i, j] > thresh else 'black',
+                fontsize=self.fontsize_ticks,
+            )
+
         plt.tight_layout()
 
 
@@ -226,17 +240,17 @@ class Evaluation:
         cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
 
         figsize = [min(15, self.n_classes * 3.5), min(15, self.n_classes * 3.5)]
+        tick_marks = np.arange(self.n_classes)
 
         plt.clf()
         plt.figure(figsize=figsize)
         plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
-        plt.title(title, fontsize=self.title_fontsize)
         plt.colorbar()
-        tick_marks = np.arange(self.n_classes)
-        plt.xticks(tick_marks, self.classes, rotation=45, fontsize=self.text_fontsize)
-        plt.yticks(tick_marks, self.classes, fontsize=self.text_fontsize)
-        plt.xlabel(xlabel, fontsize=self.text_fontsize)
-        plt.ylabel(ylabel, fontsize=self.text_fontsize)
+        plt.title(title, fontsize=self.fontsize_title)
+        plt.xlabel(xlabel, fontsize=self.fontsize_label)
+        plt.ylabel(ylabel, fontsize=self.fontsize_label)
+        plt.xticks(tick_marks, self.classes, rotation=45, fontsize=self.fontsize_ticks)
+        plt.yticks(tick_marks, self.classes, fontsize=self.fontsize_ticks)
 
         thresh = cm.max() / 2.0
         for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
@@ -246,7 +260,7 @@ class Evaluation:
                 '{:.2f}'.format(cm[i, j]),
                 horizontalalignment='center',
                 color='white' if cm[i, j] > thresh else 'black',
-                fontsize=self.text_fontsize,
+                fontsize=self.fontsize_ticks,
             )
 
         plt.tight_layout()
@@ -334,7 +348,7 @@ class Evaluation:
 
             figsize = [5 * n_cols, 5 * n_rows]
             plt.figure(figsize=figsize)
-            plt.suptitle(title, fontsize=self.title_fontsize)
+            plt.suptitle(title, fontsize=self.fontsize_title)
 
             plot_count = 1
             for (i, img, sample) in image_list[:n_rows]:
