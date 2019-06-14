@@ -106,32 +106,6 @@ class Evaluation:
 
             self.evaluation_dir.mkdir(parents=True, exist_ok=True)
 
-    def _plot_test_set_distribution(self):
-        """Plots bars with number of samples for each label in test set."""
-        self.logger.info('\n****** Calculate distribution on test set ******\n')
-
-        counts = np.bincount(self.y_true)
-        title = 'Number of images in test set: {}'.format(len(self.samples_test))
-        index = np.arange(self.n_classes)
-
-        plt.bar(index, counts)
-        plt.xlabel('Label', fontsize=self.text_fontsize)
-        plt.ylabel('Number of images', fontsize=self.text_fontsize)
-        plt.xticks(index, self.classes, fontsize=self.text_fontsize, rotation=30)
-        plt.title(title, fontsize=self.title_fontsize)
-
-        # figsize = [min(15, self.n_classes * 2), 5]
-        # plt.figure(figsize=figsize)
-        plt.tight_layout()
-
-        if self.save_plots:
-            target_file = self.evaluation_dir / 'test_set_distribution.pdf'
-            plt.savefig(target_file)
-            self.logger.info('saved under {}'.format(target_file))
-
-        if self.show_plots:
-            plt.show()
-
     @staticmethod
     def _get_probabilities_prediction(predictions_dist: List[List[float]]) -> List[float]:
         index = np.argmax(predictions_dist, axis=1)
@@ -169,6 +143,32 @@ class Evaluation:
 
         self.y_pred = np.argmax(predictions_dist, axis=1)
         self.y_pred_prob = self._get_probabilities_prediction(predictions_dist=predictions_dist)
+
+    def _plot_test_set_distribution(self):
+        """Plots bars with number of samples for each label in test set."""
+        self.logger.info('\n****** Calculate distribution on test set ******\n')
+
+        counts = np.bincount(self.y_true)
+        title = 'Number of images in test set: {}'.format(len(self.samples_test))
+        index = np.arange(self.n_classes)
+
+        plt.bar(index, counts)
+        plt.xlabel('Label', fontsize=self.text_fontsize)
+        plt.ylabel('Number of images', fontsize=self.text_fontsize)
+        plt.xticks(index, self.classes, fontsize=self.text_fontsize, rotation=30)
+        plt.title(title, fontsize=self.title_fontsize)
+
+        # figsize = [min(15, self.n_classes * 2), 5]
+        # plt.figure(figsize=figsize)
+        plt.tight_layout()
+
+        if self.save_plots:
+            target_file = self.evaluation_dir / 'test_set_distribution.pdf'
+            plt.savefig(target_file)
+            self.logger.info('saved under {}'.format(target_file))
+
+        if self.show_plots:
+            plt.show()
 
     def _plot_classification_report(self):
         """Plots classification report on prediction on test set."""
@@ -315,7 +315,6 @@ class Evaluation:
 
         return correct, wrong
 
-    # visualize misclassified images:
     def visualize_images(
         self, image_list: TYPE_IMAGE_LIST, title: str, filename: str, show_heatmap: bool = False, n_plot: int = 20
     ):
