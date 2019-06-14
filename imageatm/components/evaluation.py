@@ -61,18 +61,18 @@ class Evaluation:
         self.classes = [str(self.class_mapping[str(i)]) for i in range(self.n_classes)]
         self.y_true = np.array([i['label'] for i in self.samples_test])
 
-        self.title_fontsize = 16 if self.n_classes < 4 else 18
-        self.text_fontsize = 12 if self.n_classes < 4 else 14
-
         self._determine_plot_params()
         self._load_best_model()
         self._create_evaluation_dir()
 
     def _determine_plot_params(self):
-        """Checks whether ipython kernel is present.
+        """Determines fontsizes and checks whether ipython kernel is present.
 
         Plots will only be shown if in ipython, otherwise saved as files.
         """
+        self.title_fontsize = 16 if self.n_classes < 4 else 18
+        self.text_fontsize = 12 if self.n_classes < 4 else 14
+
         try:
             __IPYTHON__
             self.show_plots = True
@@ -113,14 +113,12 @@ class Evaluation:
         counts = np.bincount(self.y_true)
         title = 'Number of images in test set: {}'.format(len(self.samples_test))
         index = np.arange(self.n_classes)
-        title_fontsize = 16 if self.n_classes < 4 else 18
-        text_fontsize = 12 if self.n_classes < 4 else 14
 
         plt.bar(index, counts)
-        plt.xlabel('Label', fontsize=text_fontsize)
-        plt.ylabel('Number of images', fontsize=text_fontsize)
-        plt.xticks(index, self.classes, fontsize=text_fontsize, rotation=30)
-        plt.title(title, fontsize=title_fontsize)
+        plt.xlabel('Label', fontsize=self.text_fontsize)
+        plt.ylabel('Number of images', fontsize=self.text_fontsize)
+        plt.xticks(index, self.classes, fontsize=self.text_fontsize, rotation=30)
+        plt.title(title, fontsize=self.title_fontsize)
 
         # figsize = [min(15, self.n_classes * 2), 5]
         # plt.figure(figsize=figsize)
@@ -172,7 +170,7 @@ class Evaluation:
         self.y_pred = np.argmax(predictions_dist, axis=1)
         self.y_pred_prob = self._get_probabilities_prediction(predictions_dist=predictions_dist)
 
-    def _plot_classification_report(self, title='Classification report ', with_avg_total=False, cmap=plt.cm.Blues):
+    def _plot_classification_report(self):
         """Plots classification report on prediction on test set."""
         self.logger.info('\n****** Plot classification report ******\n')
 
@@ -185,6 +183,7 @@ class Evaluation:
             y_true=self.y_true, y_pred=self.y_pred, target_names=self.classes, output_dict=True
         )
 
+        ## TODO: create plotMat more explicitly
         classes = list(cr.keys())
         metrics = ['precision', 'recall', 'f1-score']
         plotMat = []
@@ -192,20 +191,18 @@ class Evaluation:
             plotMat.append(list(cr[c].values())[:3])
 
         figsize = [5, 10]
-        title_fontsize = 16 if self.n_classes < 4 else 18
-        text_fontsize = 12 if self.n_classes < 4 else 14
 
         plt.clf()
         plt.figure(figsize=figsize)
-        plt.imshow(plotMat, interpolation='nearest', cmap=cmap)
-        plt.title(title, fontsize=title_fontsize)
+        plt.imshow(plotMat, interpolation='nearest', cmap=plt.cm.Blues)
+        plt.title('Classification report', fontsize=self.title_fontsize)
         plt.colorbar()
         x_tick_marks = np.arange(3)
         y_tick_marks = np.arange(len(classes))
-        plt.xticks(x_tick_marks, metrics, rotation=45, fontsize=text_fontsize)
-        plt.yticks(y_tick_marks, classes, fontsize=text_fontsize)
-        plt.ylabel('Classes', fontsize=text_fontsize)
-        plt.xlabel('Measures', fontsize=text_fontsize)
+        plt.xticks(x_tick_marks, metrics, rotation=45, fontsize=self.text_fontsize)
+        plt.yticks(y_tick_marks, classes, fontsize=self.text_fontsize)
+        plt.ylabel('Classes', fontsize=self.text_fontsize)
+        plt.xlabel('Measures', fontsize=self.text_fontsize)
         plt.tight_layout()
 
 
@@ -229,19 +226,17 @@ class Evaluation:
         cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
 
         figsize = [min(15, self.n_classes * 3.5), min(15, self.n_classes * 3.5)]
-        title_fontsize = 16 if self.n_classes < 4 else 18
-        text_fontsize = 12 if self.n_classes < 4 else 14
 
         plt.clf()
         plt.figure(figsize=figsize)
         plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
-        plt.title(title, fontsize=title_fontsize)
+        plt.title(title, fontsize=self.title_fontsize)
         plt.colorbar()
         tick_marks = np.arange(self.n_classes)
-        plt.xticks(tick_marks, self.classes, rotation=45, fontsize=text_fontsize)
-        plt.yticks(tick_marks, self.classes, fontsize=text_fontsize)
-        plt.xlabel(xlabel, fontsize=text_fontsize)
-        plt.ylabel(ylabel, fontsize=text_fontsize)
+        plt.xticks(tick_marks, self.classes, rotation=45, fontsize=self.text_fontsize)
+        plt.yticks(tick_marks, self.classes, fontsize=self.text_fontsize)
+        plt.xlabel(xlabel, fontsize=self.text_fontsize)
+        plt.ylabel(ylabel, fontsize=self.text_fontsize)
 
         thresh = cm.max() / 2.0
         for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
@@ -251,7 +246,7 @@ class Evaluation:
                 '{:.2f}'.format(cm[i, j]),
                 horizontalalignment='center',
                 color='white' if cm[i, j] > thresh else 'black',
-                fontsize=text_fontsize,
+                fontsize=self.text_fontsize,
             )
 
         plt.tight_layout()
@@ -264,15 +259,15 @@ class Evaluation:
         if self.show_plots:
             plt.show()
 
-    def _plot_correct_wrong_examples(self, n_plot: int = 5):
+    def _plot_correct_wrong_examples(self):
         """Plots correct and wrong examples for each label in test set."""
         self.logger.info('\n****** Plot correct and wrong examples ******\n')
         for i in range(len(self.classes)):
             c, w = self.get_correct_wrong_examples(label=i)
             filename = '{}_correct.pdf'.format(self.classes[i])
-            self.visualize_images(c, title='{} (correct)'.format(self.classes[i]), filename=filename, show_heatmap=True, n_plot=n_plot)
+            self.visualize_images(c, title='{} (correct)'.format(self.classes[i]), filename=filename, show_heatmap=True, n_plot=3)
             filename = '{}_wrong.pdf'.format(self.classes[i])
-            self.visualize_images(w, title='{} (wrong)'.format(self.classes[i]), filename=filename, show_heatmap=True, n_plot=n_plot)
+            self.visualize_images(w, title='{} (wrong)'.format(self.classes[i]), filename=filename, show_heatmap=True, n_plot=3)
 
     def run(self):
         """Runs evaluation pipeline on the best model found in job directory for the specific test set:
@@ -289,7 +284,7 @@ class Evaluation:
         self._plot_classification_report()
         self._plot_confusion_matrix()
         self._plot_confusion_matrix(transposed=True)
-        self._plot_correct_wrong_examples(n_plot=3)
+        self._plot_correct_wrong_examples()
 
     # TO-DO: Enforce string or integer but not both at the same time
     def get_correct_wrong_examples(
