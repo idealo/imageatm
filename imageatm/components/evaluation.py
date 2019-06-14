@@ -61,7 +61,7 @@ class Evaluation:
         self.n_classes = len(self.class_mapping)
         self.classes = [str(self.class_mapping[str(i)]) for i in range(self.n_classes)]
         self.y_true = np.array([i['label'] for i in self.samples_test])
-        self.plots = []
+        self.figures = []
 
         self._determine_plot_params()
         self._load_best_model()
@@ -158,7 +158,7 @@ class Evaluation:
         # figsize = [min(15, self.n_classes * 2), 5]
         # plt.figure(figsize=figsize)
 
-        f = plt.figure()
+        fig = plt.figure()
         plt.bar(x_tick_marks, y_values)
         plt.title(title, fontsize=self.fontsize_title)
         plt.xlabel('Label', fontsize=self.fontsize_label)
@@ -166,8 +166,7 @@ class Evaluation:
         plt.xticks(x_tick_marks, self.classes, fontsize=self.fontsize_ticks, rotation=30)
 
         plt.tight_layout()
-        self.plots.append(f)
-        plt.close()
+        self.figures.append(fig)
 
     def _plot_classification_report(self):
         """Plots classification report on prediction on test set."""
@@ -194,7 +193,7 @@ class Evaluation:
         x_tick_marks = np.arange(3)
         y_tick_marks = np.arange(len(classes))
 
-        f = plt.figure(figsize=figsize)
+        fig = plt.figure(figsize=figsize)
         plt.imshow(plotMatArray, interpolation='nearest', cmap=plt.cm.Blues)
         plt.colorbar()
         plt.title('Classification report', fontsize=self.fontsize_title)
@@ -215,8 +214,7 @@ class Evaluation:
             )
 
         plt.tight_layout()
-        self.plots.append(f)
-        plt.close()
+        self.figures.append(fig)
 
     def _plot_confusion_matrix(self, transposed=False):
         """Plots normalized confusion matrix."""
@@ -232,7 +230,7 @@ class Evaluation:
         figsize = [min(15, self.n_classes * 3.5), min(15, self.n_classes * 3.5)]
         tick_marks = np.arange(self.n_classes)
 
-        f = plt.figure(figsize=figsize)
+        fig = plt.figure(figsize=figsize)
         plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
         plt.colorbar()
         plt.title(title, fontsize=self.fontsize_title)
@@ -253,8 +251,7 @@ class Evaluation:
             )
 
         plt.tight_layout()
-        self.plots.append(f)
-        plt.close()
+        self.figures.append(fig)
 
     def _plot_correct_wrong_examples(self):
         """Plots correct and wrong examples for each label in test set."""
@@ -271,15 +268,17 @@ class Evaluation:
         if self.save_plots:
             target_file = self.evaluation_dir / 'evaluation_report.pdf'
             pp = PdfPages(target_file)
-            for plt in self.plots:
-                pp.savefig(plt)
+            for f in self.figures:
+                pp.savefig(f)
             pp.close()
             self.logger.info('saved under {}'.format(target_file))
 
         if self.show_plots:
-            for plt in self.plots:
+            for i in range(1, len(self.figures)):
+                plt.figure(i)
                 plt.show()
 
+        plt.close()
 
     def run(self):
         """Runs evaluation pipeline on the best model found in job directory for the specific test set:
@@ -346,7 +345,7 @@ class Evaluation:
             n_cols = 2 if show_heatmap else 1
 
             figsize = [5 * n_cols, 5 * n_rows]
-            f = plt.figure(figsize=figsize)
+            fig = plt.figure(figsize=figsize)
             plt.suptitle(title, fontsize=self.fontsize_title)
 
             plot_count = 1
@@ -378,8 +377,8 @@ class Evaluation:
                     plt.axis('off')
                     plot_count += 1
 
-            self.plots.append(f)
-            plt.close()
+            self.figures.append(fig)
+
 
         # if self.save_plots:
         #     # TODO: pass name as argument
