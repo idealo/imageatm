@@ -1,6 +1,7 @@
 import itertools
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 
 plt.style.use('ggplot')
 from typing import List, Union, Tuple, Any
@@ -60,6 +61,7 @@ class Evaluation:
         self.n_classes = len(self.class_mapping)
         self.classes = [str(self.class_mapping[str(i)]) for i in range(self.n_classes)]
         self.y_true = np.array([i['label'] for i in self.samples_test])
+        self.plots = []
 
         self._determine_plot_params()
         self._load_best_model()
@@ -156,20 +158,16 @@ class Evaluation:
         # figsize = [min(15, self.n_classes * 2), 5]
         # plt.figure(figsize=figsize)
 
+        f = plt.figure()
         plt.bar(x_tick_marks, y_values)
         plt.title(title, fontsize=self.fontsize_title)
         plt.xlabel('Label', fontsize=self.fontsize_label)
         plt.ylabel('Number of images', fontsize=self.fontsize_label)
         plt.xticks(x_tick_marks, self.classes, fontsize=self.fontsize_ticks, rotation=30)
+
         plt.tight_layout()
-
-        if self.save_plots:
-            target_file = self.evaluation_dir / 'test_set_distribution.pdf'
-            plt.savefig(target_file)
-            self.logger.info('saved under {}'.format(target_file))
-
-        if self.show_plots:
-            plt.show()
+        self.plots.append(f)
+        plt.close()
 
     def _plot_classification_report(self):
         """Plots classification report on prediction on test set."""
@@ -196,8 +194,7 @@ class Evaluation:
         x_tick_marks = np.arange(3)
         y_tick_marks = np.arange(len(classes))
 
-        plt.clf()
-        plt.figure(figsize=figsize)
+        f = plt.figure(figsize=figsize)
         plt.imshow(plotMatArray, interpolation='nearest', cmap=plt.cm.Blues)
         plt.colorbar()
         plt.title('Classification report', fontsize=self.fontsize_title)
@@ -218,15 +215,8 @@ class Evaluation:
             )
 
         plt.tight_layout()
-
-
-        if self.save_plots:
-            target_file = self.evaluation_dir / 'classification_report.pdf'
-            plt.savefig(target_file)
-            self.logger.info('saved under {}'.format(target_file))
-
-        if self.show_plots:
-            plt.show()
+        self.plots.append(f)
+        plt.close()
 
     def _plot_confusion_matrix(self, transposed=False):
         """Plots normalized confusion matrix."""
@@ -242,8 +232,7 @@ class Evaluation:
         figsize = [min(15, self.n_classes * 3.5), min(15, self.n_classes * 3.5)]
         tick_marks = np.arange(self.n_classes)
 
-        plt.clf()
-        plt.figure(figsize=figsize)
+        f = plt.figure(figsize=figsize)
         plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
         plt.colorbar()
         plt.title(title, fontsize=self.fontsize_title)
@@ -264,14 +253,8 @@ class Evaluation:
             )
 
         plt.tight_layout()
-
-        if self.save_plots:
-            target_file = self.evaluation_dir / filename
-            plt.savefig(target_file)
-            self.logger.info('saved under {}'.format(target_file))
-
-        if self.show_plots:
-            plt.show()
+        self.plots.append(f)
+        plt.close()
 
     def _plot_correct_wrong_examples(self):
         """Plots correct and wrong examples for each label in test set."""
@@ -282,6 +265,21 @@ class Evaluation:
             self.visualize_images(c, title='{} (correct)'.format(self.classes[i]), filename=filename, show_heatmap=True, n_plot=3)
             filename = '{}_wrong.pdf'.format(self.classes[i])
             self.visualize_images(w, title='{} (wrong)'.format(self.classes[i]), filename=filename, show_heatmap=True, n_plot=3)
+
+    def _create_report(self):
+
+        if self.save_plots:
+            target_file = self.evaluation_dir / 'evaluation_report.pdf'
+            pp = PdfPages(target_file)
+            for plt in self.plots:
+                pp.savefig(plt)
+            pp.close()
+            self.logger.info('saved under {}'.format(target_file))
+
+        if self.show_plots:
+            for plt in self.plots:
+                plt.show()
+
 
     def run(self):
         """Runs evaluation pipeline on the best model found in job directory for the specific test set:
@@ -299,6 +297,7 @@ class Evaluation:
         self._plot_confusion_matrix()
         self._plot_confusion_matrix(transposed=True)
         self._plot_correct_wrong_examples()
+        self._create_report()
 
     # TO-DO: Enforce string or integer but not both at the same time
     def get_correct_wrong_examples(
@@ -347,7 +346,7 @@ class Evaluation:
             n_cols = 2 if show_heatmap else 1
 
             figsize = [5 * n_cols, 5 * n_rows]
-            plt.figure(figsize=figsize)
+            f = plt.figure(figsize=figsize)
             plt.suptitle(title, fontsize=self.fontsize_title)
 
             plot_count = 1
@@ -379,11 +378,14 @@ class Evaluation:
                     plt.axis('off')
                     plot_count += 1
 
-        if self.save_plots:
-            # TODO: pass name as argument
-            target_file = self.evaluation_dir / filename
-            plt.savefig(target_file)
-            self.logger.info('saved under {}'.format(target_file))
+            self.plots.append(f)
+            plt.close()
 
-        if self.show_plots:
-            plt.show()
+        # if self.save_plots:
+        #     # TODO: pass name as argument
+        #     target_file = self.evaluation_dir / filename
+        #     plt.savefig(target_file)
+        #     self.logger.info('saved under {}'.format(target_file))
+        #
+        # if self.show_plots:
+        #     plt.show()
