@@ -53,4 +53,5 @@ setup(
     ],
     packages=find_packages(exclude=('tests',)),
     entry_points={'console_scripts': ['imageatm=imageatm.client.client:cli']},
+    include_package_data=True,
 )

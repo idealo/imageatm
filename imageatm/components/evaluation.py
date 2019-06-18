@@ -1,7 +1,10 @@
 import itertools
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_pdf import PdfPages
+import nbformat
+import papermill as pm
+from nbconvert import HTMLExporter
+from os.path import dirname
 
 plt.style.use('ggplot')
 from typing import List, Union, Tuple, Any
@@ -14,6 +17,7 @@ from imageatm.utils.io import load_json
 from imageatm.utils.images import load_image
 from imageatm.utils.logger import get_logger
 from imageatm.utils.tf_keras import use_multiprocessing, load_model
+import imageatm.notebooks
 
 
 BATCH_SIZE = 16
@@ -263,22 +267,44 @@ class Evaluation:
             filename = '{}_wrong.pdf'.format(self.classes[i])
             self.visualize_images(w, title='{} (wrong)'.format(self.classes[i]), filename=filename, show_heatmap=True, n_plot=3)
 
-    def _create_report(self):
-
-        if self.save_plots:
-            target_file = self.evaluation_dir / 'evaluation_report.pdf'
-            pp = PdfPages(target_file)
-            for f in self.figures:
-                pp.savefig(f)
-            pp.close()
-            self.logger.info('saved under {}'.format(target_file))
-
+    def _create_plot(self):
+        """Plots all figures in jupyter notebook."""
         if self.show_plots:
             for i in range(1, len(self.figures)):
                 plt.figure(i)
                 plt.show()
+            plt.close()
 
-        plt.close()
+    def _create_report(self):
+        """Creates report from notebook-template and stores it in different formats all figures.
+
+            - Jupyter Notebook
+            - HTML
+            - PDF
+        """
+        if self.save_plots:
+            filepath_template = dirname(imageatm.notebooks.__file__) + '/evaluation_template.ipynb'
+            filepath_notebook = self.evaluation_dir / 'evaluation_report.ipynb'
+            filepath_html = self.evaluation_dir / 'evaluation_notebook.html'
+
+            pm.execute_notebook(
+                str(filepath_template),
+                str(filepath_notebook),
+                parameters=dict(
+                    image_dir=str(self.image_dir),
+                    job_dir=str(self.job_dir)
+                )
+            )
+
+            with open(filepath_notebook) as f:
+                nb = nbformat.read(f, as_version=4)
+
+            html_exporter = HTMLExporter()
+            html_data, resources = html_exporter.from_notebook_node(nb)
+
+            with open(filepath_html, 'w') as f:
+                f.write(html_data)
+                f.close()
 
     def run(self):
         """Runs evaluation pipeline on the best model found in job directory for the specific test set:
@@ -288,15 +314,20 @@ class Evaluation:
             - Plots classification report (accuracy, precision, recall)
             - Plots confusion matrix (on precsion and on recall)
             - Plots correct and wrong examples
-        """
 
-        self._make_prediction_on_test_set()
-        self._plot_test_set_distribution()
-        self._plot_classification_report()
-        self._plot_confusion_matrix()
-        self._plot_confusion_matrix(transposed=True)
-        self._plot_correct_wrong_examples()
-        self._create_report()
+           If not in ipython an evaluation report is created.
+        """
+        if self.show_plots:
+            self._make_prediction_on_test_set()
+            self._plot_test_set_distribution()
+            self._plot_classification_report()
+            self._plot_confusion_matrix()
+            self._plot_confusion_matrix(transposed=True)
+            self._plot_correct_wrong_examples()
+            self._create_plot()
+
+        if self.save_plots:
+            self._create_report()
 
     # TO-DO: Enforce string or integer but not both at the same time
     def get_correct_wrong_examples(
