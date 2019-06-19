@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import nbformat
 import papermill as pm
-from nbconvert import HTMLExporter
+from nbconvert import HTMLExporter, PDFExporter
 from os.path import dirname
 
 plt.style.use('ggplot')
@@ -285,17 +285,21 @@ class Evaluation:
         if self.save_plots:
             filepath_template = dirname(imageatm.notebooks.__file__) + '/evaluation_template.ipynb'
             filepath_notebook = self.evaluation_dir / 'evaluation_report.ipynb'
-            filepath_html = self.evaluation_dir / 'evaluation_notebook.html'
+            filepath_html = self.evaluation_dir / 'evaluation_report.html'
+            filepath_pdf = self.evaluation_dir / 'evaluation_report.pdf'
 
+            self.logger.info('\n****** Create Jupyter Notebook (this may take a while) ******\n')
             pm.execute_notebook(
                 str(filepath_template),
                 str(filepath_notebook),
                 parameters=dict(
                     image_dir=str(self.image_dir),
                     job_dir=str(self.job_dir)
-                )
+                ),
+                kernel_name='image-atm'
             )
 
+            self.logger.info('\n****** Create HTML ******\n')
             with open(filepath_notebook) as f:
                 nb = nbformat.read(f, as_version=4)
 
@@ -304,6 +308,14 @@ class Evaluation:
 
             with open(filepath_html, 'w') as f:
                 f.write(html_data)
+                f.close()
+
+            self.logger.info('\n****** Create PDF ******\n')
+            pdf_exporter = PDFExporter()
+            pdf_data, resources = pdf_exporter.from_notebook_node(nb)
+
+            with open(filepath_pdf, 'wb') as f:
+                f.write(pdf_data)
                 f.close()
 
     def run(self):
