@@ -30,6 +30,7 @@ setup(
         'Click',
         'h5py',
         'matplotlib',
+        'papermill',
         'Pillow',
         'scikit-learn',
         'scipy==1.1.*',

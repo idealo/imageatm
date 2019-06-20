@@ -312,29 +312,6 @@ class Evaluation:
                 f.write(pdf_data)
                 f.close()
 
-    def run(self):
-        """Runs evaluation pipeline on the best model found in job directory for the specific test set:
-
-            - Makes prediction on test set
-            - Plots test set distribution
-            - Plots classification report (accuracy, precision, recall)
-            - Plots confusion matrix (on precsion and on recall)
-            - Plots correct and wrong examples
-
-           If not in ipython an evaluation report is created.
-        """
-        if self.show_plots:
-            self._make_prediction_on_test_set()
-            self._plot_test_set_distribution(figsize=[8, 5])
-            self._plot_classification_report(figsize=[5, 8])
-            self._plot_confusion_matrix(figsize=[9, 9])
-            self._plot_confusion_matrix(figsize=[9, 9], transposed=True)
-            self._plot_correct_wrong_examples()
-            self._create_plot()
-
-        if self.save_plots:
-            self._create_report()
-
     # TO-DO: Enforce string or integer but not both at the same time
     def get_correct_wrong_examples(
         self, label: Union[int, str]
@@ -416,12 +393,25 @@ class Evaluation:
 
             self.figures.append(fig)
 
+    def run(self):
+        """Runs evaluation pipeline on the best model found in job directory for the specific test set:
 
-        # if self.save_plots:
-        #     # TODO: pass name as argument
-        #     target_file = self.evaluation_dir / filename
-        #     plt.savefig(target_file)
-        #     self.logger.info('saved under {}'.format(target_file))
-        #
-        # if self.show_plots:
-        #     plt.show()
+            - Makes prediction on test set
+            - Plots test set distribution
+            - Plots classification report (accuracy, precision, recall)
+            - Plots confusion matrix (on precsion and on recall)
+            - Plots correct and wrong examples
+
+           If not in ipython an evaluation report is created.
+        """
+        if self.show_plots:
+            self._make_prediction_on_test_set()
+            self._plot_test_set_distribution(figsize=[8, 5])
+            self._plot_classification_report(figsize=[5, 8])
+            self._plot_confusion_matrix(figsize=[9, 9])
+            self._plot_confusion_matrix(figsize=[9, 9], transposed=True)
+            self._plot_correct_wrong_examples()
+            self._create_plot()
+
+        if self.save_plots:
+            self._create_report()
