@@ -256,10 +256,8 @@ class Evaluation:
         self.logger.info('\n****** Plot correct and wrong examples ******\n')
         for i in range(len(self.classes)):
             c, w = self.get_correct_wrong_examples(label=i)
-            filename = '{}_correct.pdf'.format(self.classes[i])
-            self.visualize_images(c, title='{} (correct)'.format(self.classes[i]), filename=filename, show_heatmap=True, n_plot=3)
-            filename = '{}_wrong.pdf'.format(self.classes[i])
-            self.visualize_images(w, title='{} (wrong)'.format(self.classes[i]), filename=filename, show_heatmap=True, n_plot=3)
+            self.visualize_images(c, title='Label: "{}" (correct predicted)'.format(self.classes[i]), show_heatmap=True, n_plot=3)
+            self.visualize_images(w, title='Label: "{}" (wrong predicted)'.format(self.classes[i]), show_heatmap=True, n_plot=3)
 
     def _create_plot(self):
         """Plots all figures in jupyter notebook."""
@@ -342,7 +340,7 @@ class Evaluation:
         return correct, wrong
 
     def visualize_images(
-        self, image_list: TYPE_IMAGE_LIST, title: str, filename: str, show_heatmap: bool = False, n_plot: int = 20
+        self, image_list: TYPE_IMAGE_LIST, title: str, show_heatmap: bool = False, n_plot: int = 20
     ):
         """Visualizes images in a sample list.
 
@@ -358,9 +356,9 @@ class Evaluation:
             n_rows = min(n_plot, len(image_list))
             n_cols = 2 if show_heatmap else 1
 
-            figsize = [4.5 * n_cols, 4 * n_rows]
+            figsize = [5 * n_cols, 4 * n_rows]
             fig = plt.figure(figsize=figsize)
-            plt.title(title, fontsize=self.fontsize_title)
+            fig.suptitle(title, fontsize=self.fontsize_title)
 
             plot_count = 1
             for (i, img, sample) in image_list[:n_rows]:
@@ -407,9 +405,9 @@ class Evaluation:
         if self.show_plots:
             self._make_prediction_on_test_set()
             self._plot_test_set_distribution(figsize=[8, 5])
-            self._plot_classification_report(figsize=[5, 8])
-            self._plot_confusion_matrix(figsize=[9, 9])
-            self._plot_confusion_matrix(figsize=[9, 9], transposed=True)
+            self._plot_classification_report(figsize=[max(5,self.n_classes*0.5), max(8,self.n_classes*0.8)])
+            self._plot_confusion_matrix(figsize=[max(9,self.n_classes*0.9), max(8,self.n_classes*0.9)])
+            self._plot_confusion_matrix(figsize=[max(9,self.n_classes*0.9), max(8,self.n_classes*0.9)], transposed=True)
             self._plot_correct_wrong_examples()
             self._create_plot()
 
