@@ -151,18 +151,15 @@ class Evaluation:
         self.y_pred = np.argmax(predictions_dist, axis=1)
         self.y_pred_prob = self._get_probabilities_prediction(predictions_dist=predictions_dist)
 
-    def _plot_test_set_distribution(self):
+    def _plot_test_set_distribution(self, figsize: (float, float) = [8, 5]):
         """Plots bars with number of samples for each label in test set."""
         self.logger.info('\n****** Calculate distribution on test set ******\n')
 
-        title = 'Number of images in test set: {}'.format(len(self.samples_test))
         x_tick_marks = np.arange(self.n_classes)
         y_values = np.bincount(self.y_true)
+        title = 'Number of images in test set: {}'.format(len(self.samples_test))
 
-        # figsize = [min(15, self.n_classes * 2), 5]
-        # plt.figure(figsize=figsize)
-
-        fig = plt.figure()
+        fig = plt.figure(figsize=figsize)
         plt.bar(x_tick_marks, y_values)
         plt.title(title, fontsize=self.fontsize_title)
         plt.xlabel('Label', fontsize=self.fontsize_label)
@@ -172,7 +169,7 @@ class Evaluation:
         plt.tight_layout()
         self.figures.append(fig)
 
-    def _plot_classification_report(self):
+    def _plot_classification_report(self, figsize: (float, float) = [5, 8]):
         """Plots classification report on prediction on test set."""
         self.logger.info('\n****** Plot classification report ******\n')
 
@@ -185,17 +182,16 @@ class Evaluation:
             y_true=self.y_true, y_pred=self.y_pred, target_names=self.classes, output_dict=True
         )
 
-        ## TODO: create plotMat more explicitly
-        classes = list(cr.keys())
         metrics = ['precision', 'recall', 'f1-score']
+        categories = self.classes.copy()
+        categories.extend(['macro avg', 'weighted avg'])
         plotMat = []
-        for c in classes:
+        for c in categories:
             plotMat.append(list(cr[c].values())[:3])
 
-        figsize = [5, 10]
         plotMatArray = np.asarray(plotMat)
         x_tick_marks = np.arange(3)
-        y_tick_marks = np.arange(len(classes))
+        y_tick_marks = np.arange(len(categories))
 
         fig = plt.figure(figsize=figsize)
         plt.imshow(plotMatArray, interpolation='nearest', cmap=plt.cm.Blues)
@@ -204,7 +200,7 @@ class Evaluation:
         plt.xlabel('Measures', fontsize=self.fontsize_label)
         plt.ylabel('Classes', fontsize=self.fontsize_label)
         plt.xticks(x_tick_marks, metrics, rotation=45, fontsize=self.fontsize_ticks)
-        plt.yticks(y_tick_marks, classes, fontsize=self.fontsize_ticks)
+        plt.yticks(y_tick_marks, categories, fontsize=self.fontsize_ticks)
 
         thresh = plotMatArray.max() / 2.0
         for i, j in itertools.product(range(plotMatArray.shape[0]), range(plotMatArray.shape[1])):
@@ -220,7 +216,7 @@ class Evaluation:
         plt.tight_layout()
         self.figures.append(fig)
 
-    def _plot_confusion_matrix(self, transposed=False):
+    def _plot_confusion_matrix(self, figsize: (float, float) = [9, 9], transposed: bool = False):
         """Plots normalized confusion matrix."""
         (title, xlabel, ylabel, filename) = \
             ('Confusion matrix (precision)', 'True label', 'Predicted label', 'confusion_matrix_precision.pdf') if transposed \
@@ -230,8 +226,6 @@ class Evaluation:
         cm = confusion_matrix(y_true=self.y_pred, y_pred=self.y_true) if transposed \
             else confusion_matrix(y_true=self.y_true, y_pred=self.y_pred)
         cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-
-        figsize = [min(15, self.n_classes * 3.5), min(15, self.n_classes * 3.5)]
         tick_marks = np.arange(self.n_classes)
 
         fig = plt.figure(figsize=figsize)
@@ -331,10 +325,10 @@ class Evaluation:
         """
         if self.show_plots:
             self._make_prediction_on_test_set()
-            self._plot_test_set_distribution()
-            self._plot_classification_report()
-            self._plot_confusion_matrix()
-            self._plot_confusion_matrix(transposed=True)
+            self._plot_test_set_distribution(figsize=[8, 5])
+            self._plot_classification_report(figsize=[5, 8])
+            self._plot_confusion_matrix(figsize=[9, 9])
+            self._plot_confusion_matrix(figsize=[9, 9], transposed=True)
             self._plot_correct_wrong_examples()
             self._create_plot()
 
@@ -387,9 +381,9 @@ class Evaluation:
             n_rows = min(n_plot, len(image_list))
             n_cols = 2 if show_heatmap else 1
 
-            figsize = [5 * n_cols, 5 * n_rows]
+            figsize = [4.5 * n_cols, 4 * n_rows]
             fig = plt.figure(figsize=figsize)
-            plt.suptitle(title, fontsize=self.fontsize_title)
+            plt.title(title, fontsize=self.fontsize_title)
 
             plot_count = 1
             for (i, img, sample) in image_list[:n_rows]:
