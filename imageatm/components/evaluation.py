@@ -194,7 +194,7 @@ class Evaluation:
         y_tick_marks = np.arange(len(categories))
 
         fig = plt.figure(figsize=figsize)
-        plt.imshow(plotMatArray, interpolation='nearest', cmap=plt.cm.Blues)
+        plt.imshow(plotMatArray, interpolation='nearest', cmap=plt.cm.Blues, vmin=0, vmax=1)
         plt.colorbar()
         plt.title('Classification report', fontsize=self.fontsize_title)
         plt.xlabel('Measures', fontsize=self.fontsize_label)
@@ -229,7 +229,7 @@ class Evaluation:
         tick_marks = np.arange(self.n_classes)
 
         fig = plt.figure(figsize=figsize)
-        plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
+        plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues, vmin=0, vmax=1)
         plt.colorbar()
         plt.title(title, fontsize=self.fontsize_title)
         plt.xlabel(xlabel, fontsize=self.fontsize_label)
