@@ -22,6 +22,7 @@ import imageatm.notebooks
 
 BATCH_SIZE = 16
 BASE_MODEL_NAME = 'MobileNet'
+MAX_N_CLASSES = 20
 
 USE_MULTIPROCESSING, WORKERS = use_multiprocessing()
 
@@ -33,6 +34,7 @@ class Evaluation:
 
     Loads the best model (validation accuracy) from *models* directory in job directory.
     All metrics and graphs are based on *test_samples.json* in job directory.
+    Plots will only be shown if number of classes 20 or less.
 
     Attributes:
         image_dir: Path of image directory.
@@ -121,7 +123,6 @@ class Evaluation:
 
     def _make_prediction_on_test_set(self):
         """Makes prediction on test set."""
-        self.logger.info('\n****** Make prediction on test set ******\n')
 
         self.classifier = ImageClassifier(
             base_model_name=self.base_model_name,
@@ -154,7 +155,7 @@ class Evaluation:
     def _plot_test_set_distribution(self, figsize: (float, float) = [8, 5]):
         """Plots bars with number of samples for each label in test set."""
         assert self.show_plots, 'Plotting is only possible when in ipython-mode'
-        self.logger.info('\n****** Plot distribution on test set ******\n')
+        assert self.n_classes <= MAX_N_CLASSES,'Plotting only for max {} classes'.format(MAX_N_CLASSES)
 
         x_tick_marks = np.arange(self.n_classes)
         y_values = np.bincount(self.y_true)
@@ -173,13 +174,9 @@ class Evaluation:
     def _plot_classification_report(self, figsize: (float, float) = [5, 8]):
         """Plots classification report on prediction on test set."""
         assert self.show_plots, 'Plotting is only possible when in ipython-mode'
-        self.logger.info('\n****** Plot classification report ******\n')
+        assert self.n_classes <= MAX_N_CLASSES, 'Plotting only for max {} classes'.format(MAX_N_CLASSES)
 
         self.accuracy = accuracy_score(y_true=self.y_true, y_pred=self.y_pred)
-        self.logger.info(
-            'Model achieves {}% accuracy on test set\n'.format(round(self.accuracy * 100, 2))
-        )
-
         cr = classification_report(
             y_true=self.y_true, y_pred=self.y_pred, target_names=self.classes, output_dict=True
         )
@@ -194,11 +191,12 @@ class Evaluation:
         plotMatArray = np.asarray(plotMat)
         x_tick_marks = np.arange(3)
         y_tick_marks = np.arange(len(categories))
+        title = 'Accuracy on prediction test set: {}'.format(round(self.accuracy * 100, 2))
 
         fig = plt.figure(figsize=figsize)
         plt.imshow(plotMatArray, interpolation='nearest', cmap=plt.cm.Blues, vmin=0, vmax=1)
         plt.colorbar()
-        plt.title('Classification report', fontsize=self.fontsize_title)
+        plt.title(title, fontsize=self.fontsize_title)
         plt.xlabel('Measures', fontsize=self.fontsize_label)
         plt.ylabel('Classes', fontsize=self.fontsize_label)
         plt.xticks(x_tick_marks, metrics, rotation=45, fontsize=self.fontsize_ticks)
@@ -218,15 +216,16 @@ class Evaluation:
         plt.tight_layout()
         plt.show()
 
-    def _plot_confusion_matrix(self, figsize: (float, float) = [9, 9], transposed: bool = False):
+    def _plot_confusion_matrix(self, figsize: (float, float) = [9, 9], precision: bool = False):
         """Plots normalized confusion matrix."""
         assert self.show_plots, 'Plotting is only possible when in ipython-mode'
-        (title, xlabel, ylabel, filename) = \
-            ('Confusion matrix (precision)', 'True label', 'Predicted label', 'confusion_matrix_precision.pdf') if transposed \
-            else ('Confusion matrix (recall)', 'Predicted label', 'True label', 'confusion_matrix_recall.pdf')
-        self.logger.info('\n****** Plot ' + title + ' ******\n')
+        assert self.n_classes <= MAX_N_CLASSES, 'Plotting only for max {} classes'.format(MAX_N_CLASSES)
 
-        cm = confusion_matrix(y_true=self.y_pred, y_pred=self.y_true) if transposed \
+        (title, xlabel, ylabel) = \
+            ('Confusion matrix (precision)', 'True label', 'Predicted label') if precision \
+            else ('Confusion matrix (recall)', 'Predicted label', 'True label')
+
+        cm = confusion_matrix(y_true=self.y_pred, y_pred=self.y_true) if precision \
             else confusion_matrix(y_true=self.y_true, y_pred=self.y_pred)
         cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
         tick_marks = np.arange(self.n_classes)
@@ -257,7 +256,8 @@ class Evaluation:
     def _plot_correct_wrong_examples(self):
         """Plots correct and wrong examples for each label in test set."""
         assert self.show_plots, 'Plotting is only possible when in ipython-mode'
-        self.logger.info('\n****** Plot correct and wrong examples ******\n')
+        assert self.n_classes <= MAX_N_CLASSES, 'Plotting only for max {} classes'.format(MAX_N_CLASSES)
+
         for i in range(len(self.classes)):
             c, w = self.get_correct_wrong_examples(label=i)
             self.visualize_images(c, title='Label: "{}" (correct predicted)'.format(self.classes[i]), show_heatmap=True, n_plot=3)
@@ -271,12 +271,12 @@ class Evaluation:
             - PDF
         """
         assert self.save_plots, 'Create report is only possible when not in ipython-mode'
+
         filepath_template = dirname(imageatm.notebooks.__file__) + '/evaluation_template.ipynb'
         filepath_notebook = self.evaluation_dir / 'evaluation_report.ipynb'
         filepath_html = self.evaluation_dir / 'evaluation_report.html'
         filepath_pdf = self.evaluation_dir / 'evaluation_report.pdf'
 
-        self.logger.info('\n****** Create Jupyter Notebook (this may take a while) ******\n')
         pm.execute_notebook(
             str(filepath_template),
             str(filepath_notebook),
@@ -399,12 +399,24 @@ class Evaluation:
            If not in ipython an evaluation report is created.
         """
         if self.show_plots:
+            self.logger.info('\n****** Make prediction on test set ******\n')
             self._make_prediction_on_test_set()
+
+            self.logger.info('\n****** Plot distribution on test set ******\n')
             self._plot_test_set_distribution(figsize=[8, 5])
+
+            self.logger.info('\n****** Plot classification report ******\n')
             self._plot_classification_report(figsize=[max(5,self.n_classes*0.5), max(8,self.n_classes*0.8)])
+
+            self.logger.info('\n****** Plot confusion matrix (recall) ******\n')
             self._plot_confusion_matrix(figsize=[max(9,self.n_classes*0.9), max(8,self.n_classes*0.9)])
-            self._plot_confusion_matrix(figsize=[max(9,self.n_classes*0.9), max(8,self.n_classes*0.9)], transposed=True)
+
+            self.logger.info('\n****** Plot confusion matrix (precision) ******\n')
+            self._plot_confusion_matrix(figsize=[max(9,self.n_classes*0.9), max(8,self.n_classes*0.9)], precision=True)
+
+            self.logger.info('\n****** Plot correct and wrong examples ******\n')
             self._plot_correct_wrong_examples()
 
         if self.save_plots:
+            self.logger.info('\n****** Create Jupyter Notebook (this may take a while) ******\n')
             self._create_report()
