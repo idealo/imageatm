@@ -153,7 +153,8 @@ class Evaluation:
 
     def _plot_test_set_distribution(self, figsize: (float, float) = [8, 5]):
         """Plots bars with number of samples for each label in test set."""
-        self.logger.info('\n****** Calculate distribution on test set ******\n')
+        assert self.show_plots, 'Plotting is only possible when in ipython-mode'
+        self.logger.info('\n****** Plot distribution on test set ******\n')
 
         x_tick_marks = np.arange(self.n_classes)
         y_values = np.bincount(self.y_true)
@@ -167,10 +168,11 @@ class Evaluation:
         plt.xticks(x_tick_marks, self.classes, fontsize=self.fontsize_ticks, rotation=30)
 
         plt.tight_layout()
-        self.figures.append(fig)
+        plt.show()
 
     def _plot_classification_report(self, figsize: (float, float) = [5, 8]):
         """Plots classification report on prediction on test set."""
+        assert self.show_plots, 'Plotting is only possible when in ipython-mode'
         self.logger.info('\n****** Plot classification report ******\n')
 
         self.accuracy = accuracy_score(y_true=self.y_true, y_pred=self.y_pred)
@@ -214,10 +216,11 @@ class Evaluation:
             )
 
         plt.tight_layout()
-        self.figures.append(fig)
+        plt.show()
 
     def _plot_confusion_matrix(self, figsize: (float, float) = [9, 9], transposed: bool = False):
         """Plots normalized confusion matrix."""
+        assert self.show_plots, 'Plotting is only possible when in ipython-mode'
         (title, xlabel, ylabel, filename) = \
             ('Confusion matrix (precision)', 'True label', 'Predicted label', 'confusion_matrix_precision.pdf') if transposed \
             else ('Confusion matrix (recall)', 'Predicted label', 'True label', 'confusion_matrix_recall.pdf')
@@ -249,23 +252,16 @@ class Evaluation:
             )
 
         plt.tight_layout()
-        self.figures.append(fig)
+        plt.show()
 
     def _plot_correct_wrong_examples(self):
         """Plots correct and wrong examples for each label in test set."""
+        assert self.show_plots, 'Plotting is only possible when in ipython-mode'
         self.logger.info('\n****** Plot correct and wrong examples ******\n')
         for i in range(len(self.classes)):
             c, w = self.get_correct_wrong_examples(label=i)
             self.visualize_images(c, title='Label: "{}" (correct predicted)'.format(self.classes[i]), show_heatmap=True, n_plot=3)
             self.visualize_images(w, title='Label: "{}" (wrong predicted)'.format(self.classes[i]), show_heatmap=True, n_plot=3)
-
-    def _create_plot(self):
-        """Plots all figures in jupyter notebook."""
-        if self.show_plots:
-            for i in range(1, len(self.figures)):
-                plt.figure(i)
-                plt.show()
-            plt.close()
 
     def _create_report(self):
         """Creates report from notebook-template and stores it in different formats all figures.
@@ -274,41 +270,41 @@ class Evaluation:
             - HTML
             - PDF
         """
-        if self.save_plots:
-            filepath_template = dirname(imageatm.notebooks.__file__) + '/evaluation_template.ipynb'
-            filepath_notebook = self.evaluation_dir / 'evaluation_report.ipynb'
-            filepath_html = self.evaluation_dir / 'evaluation_report.html'
-            filepath_pdf = self.evaluation_dir / 'evaluation_report.pdf'
+        assert self.save_plots, 'Create report is only possible when not in ipython-mode'
+        filepath_template = dirname(imageatm.notebooks.__file__) + '/evaluation_template.ipynb'
+        filepath_notebook = self.evaluation_dir / 'evaluation_report.ipynb'
+        filepath_html = self.evaluation_dir / 'evaluation_report.html'
+        filepath_pdf = self.evaluation_dir / 'evaluation_report.pdf'
 
-            self.logger.info('\n****** Create Jupyter Notebook (this may take a while) ******\n')
-            pm.execute_notebook(
-                str(filepath_template),
-                str(filepath_notebook),
-                parameters=dict(
-                    image_dir=str(self.image_dir),
-                    job_dir=str(self.job_dir)
-                ),
-                kernel_name='image-atm'
-            )
+        self.logger.info('\n****** Create Jupyter Notebook (this may take a while) ******\n')
+        pm.execute_notebook(
+            str(filepath_template),
+            str(filepath_notebook),
+            parameters=dict(
+                image_dir=str(self.image_dir),
+                job_dir=str(self.job_dir)
+            ),
+            kernel_name='image-atm'
+        )
 
-            self.logger.info('\n****** Create HTML ******\n')
-            with open(filepath_notebook) as f:
-                nb = nbformat.read(f, as_version=4)
+        self.logger.info('\n****** Create HTML ******\n')
+        with open(filepath_notebook) as f:
+            nb = nbformat.read(f, as_version=4)
 
-            html_exporter = HTMLExporter()
-            html_data, resources = html_exporter.from_notebook_node(nb)
+        html_exporter = HTMLExporter()
+        html_data, resources = html_exporter.from_notebook_node(nb)
 
-            with open(filepath_html, 'w') as f:
-                f.write(html_data)
-                f.close()
+        with open(filepath_html, 'w') as f:
+            f.write(html_data)
+            f.close()
 
-            self.logger.info('\n****** Create PDF ******\n')
-            pdf_exporter = PDFExporter()
-            pdf_data, resources = pdf_exporter.from_notebook_node(nb)
+        self.logger.info('\n****** Create PDF ******\n')
+        pdf_exporter = PDFExporter()
+        pdf_data, resources = pdf_exporter.from_notebook_node(nb)
 
-            with open(filepath_pdf, 'wb') as f:
-                f.write(pdf_data)
-                f.close()
+        with open(filepath_pdf, 'wb') as f:
+            f.write(pdf_data)
+            f.close()
 
     # TO-DO: Enforce string or integer but not both at the same time
     def get_correct_wrong_examples(
@@ -389,7 +385,7 @@ class Evaluation:
                     plt.axis('off')
                     plot_count += 1
 
-            self.figures.append(fig)
+            plt.show()
 
     def run(self):
         """Runs evaluation pipeline on the best model found in job directory for the specific test set:
@@ -409,7 +405,6 @@ class Evaluation:
             self._plot_confusion_matrix(figsize=[max(9,self.n_classes*0.9), max(8,self.n_classes*0.9)])
             self._plot_confusion_matrix(figsize=[max(9,self.n_classes*0.9), max(8,self.n_classes*0.9)], transposed=True)
             self._plot_correct_wrong_examples()
-            self._create_plot()
 
         if self.save_plots:
             self._create_report()
