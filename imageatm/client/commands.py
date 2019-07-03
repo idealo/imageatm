@@ -194,9 +194,16 @@ def evaluate(
     config_file: Optional[Path] = None,
     image_dir: Optional[Path] = None,
     job_dir: Optional[Path] = None,
+    report_html: Optional[bool] = None,
+    report_pdf: Optional[bool] = None,
 ):
     config = update_config(
-        config=config, config_file=config_file, job_dir=job_dir, image_dir=image_dir
+        config=config,
+        config_file=config_file,
+        job_dir=job_dir,
+        image_dir=image_dir,
+        report_html=report_html,
+        report_pdf=report_pdf,
     )
 
     config.evaluate['run'] = True

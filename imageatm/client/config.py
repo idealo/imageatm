@@ -194,7 +194,10 @@ def val_train(config: dict) -> List[str]:
 
 def val_evaluate(config: dict) -> List[str]:
     required_keys = ['image_dir', 'job_dir', 'run']
-    optional_keys: list = []
+    optional_keys: list = [
+        'report_html',
+        'report_pdf',
+    ]
 
     return get_diff('evaluate', config, required_keys, optional_keys)
 

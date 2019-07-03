@@ -263,7 +263,7 @@ class Evaluation:
             self.visualize_images(c, title='Label: "{}" (correct predicted)'.format(self.classes[i]), show_heatmap=True, n_plot=3)
             self.visualize_images(w, title='Label: "{}" (wrong predicted)'.format(self.classes[i]), show_heatmap=True, n_plot=3)
 
-    def _create_report(self):
+    def _create_report(self, report_html:bool, report_pdf:bool):
         """Creates report from notebook-template and stores it in different formats all figures.
 
             - Jupyter Notebook
@@ -287,24 +287,26 @@ class Evaluation:
             kernel_name='image-atm'
         )
 
-        self.logger.info('\n****** Create HTML ******\n')
-        with open(filepath_notebook) as f:
-            nb = nbformat.read(f, as_version=4)
+        if report_html:
+            self.logger.info('\n****** Create HTML ******\n')
+            with open(filepath_notebook) as f:
+                nb = nbformat.read(f, as_version=4)
 
-        html_exporter = HTMLExporter()
-        html_data, resources = html_exporter.from_notebook_node(nb)
+            html_exporter = HTMLExporter()
+            html_data, resources = html_exporter.from_notebook_node(nb)
 
-        with open(filepath_html, 'w') as f:
-            f.write(html_data)
-            f.close()
+            with open(filepath_html, 'w') as f:
+                f.write(html_data)
+                f.close()
 
-        self.logger.info('\n****** Create PDF ******\n')
-        pdf_exporter = PDFExporter()
-        pdf_data, resources = pdf_exporter.from_notebook_node(nb)
+        if report_pdf:
+            self.logger.info('\n****** Create PDF ******\n')
+            pdf_exporter = PDFExporter()
+            pdf_data, resources = pdf_exporter.from_notebook_node(nb)
 
-        with open(filepath_pdf, 'wb') as f:
-            f.write(pdf_data)
-            f.close()
+            with open(filepath_pdf, 'wb') as f:
+                f.write(pdf_data)
+                f.close()
 
     # TO-DO: Enforce string or integer but not both at the same time
     def get_correct_wrong_examples(
@@ -387,7 +389,7 @@ class Evaluation:
 
             plt.show()
 
-    def run(self):
+    def run(self, report_html: bool = False, report_pdf: bool = False):
         """Runs evaluation pipeline on the best model found in job directory for the specific test set:
 
             - Makes prediction on test set
@@ -397,6 +399,10 @@ class Evaluation:
             - Plots correct and wrong examples
 
            If not in ipython an evaluation report is created.
+
+       Args:
+            report_html: boolean (creates a report in html).
+            report_pdf: boolean (creates a report in pdf).
         """
         if self.show_plots:
             self.logger.info('\n****** Make prediction on test set ******\n')
@@ -419,4 +425,4 @@ class Evaluation:
 
         if self.save_plots:
             self.logger.info('\n****** Create Jupyter Notebook (this may take a while) ******\n')
-            self._create_report()
+            self._create_report(report_html, report_pdf)
