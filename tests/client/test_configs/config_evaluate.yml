@@ -12,6 +12,8 @@ train:
 
 evaluate:
   run: True
+  report_pdf: True
+  report_html: True
 
 cloud:
   run: False

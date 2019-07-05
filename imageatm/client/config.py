@@ -57,11 +57,15 @@ def update_config(
     epochs_train_all: Optional[int] = None,
     base_model_name: Optional[str] = None,
     cloud_tag: Optional[str] = None,
+    report_html:  Optional[bool] = None,
+    report_pdf: Optional[bool] = None,
 ) -> Config:
 
     # set defaults
     config.train['cloud'] = False
     config.dataprep['resize'] = False
+    config.evaluate['report_html'] = False
+    config.evaluate['report_pdf'] = False
     config.pipeline = []
 
     # load central config file
@@ -142,6 +146,12 @@ def update_config(
 
     if cloud_tag is not None:
         config.cloud['cloud_tag'] = cloud_tag
+
+    if report_html is True:
+        config.evaluate['report_html'] = True
+
+    if report_pdf is True:
+        config.evaluate['report_pdf'] = True
 
     config = update_component_configs(config)
 
