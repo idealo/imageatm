@@ -155,7 +155,10 @@ class Evaluation:
     def _plot_test_set_distribution(self, figsize: (float, float) = [8, 5]):
         """Plots bars with number of samples for each label in test set."""
         assert self.show_plots, 'Plotting is only possible when in ipython-mode'
-        assert self.n_classes <= MAX_N_CLASSES,'Plotting only for max {} classes'.format(MAX_N_CLASSES)
+
+        if self.n_classes > MAX_N_CLASSES:
+            self.logger.info('\nPlotting only for max {} classes\n'.format(MAX_N_CLASSES))
+            return
 
         x_tick_marks = np.arange(self.n_classes)
         y_values = np.bincount(self.y_true)
@@ -174,7 +177,10 @@ class Evaluation:
     def _plot_classification_report(self, figsize: (float, float) = [5, 8]):
         """Plots classification report on prediction on test set."""
         assert self.show_plots, 'Plotting is only possible when in ipython-mode'
-        assert self.n_classes <= MAX_N_CLASSES, 'Plotting only for max {} classes'.format(MAX_N_CLASSES)
+
+        if self.n_classes > MAX_N_CLASSES:
+            self.logger.info('\nPlotting only for max {} classes\n'.format(MAX_N_CLASSES))
+            return
 
         self.accuracy = accuracy_score(y_true=self.y_true, y_pred=self.y_pred)
         cr = classification_report(
@@ -219,7 +225,10 @@ class Evaluation:
     def _plot_confusion_matrix(self, figsize: (float, float) = [9, 9], precision: bool = False):
         """Plots normalized confusion matrix."""
         assert self.show_plots, 'Plotting is only possible when in ipython-mode'
-        assert self.n_classes <= MAX_N_CLASSES, 'Plotting only for max {} classes'.format(MAX_N_CLASSES)
+
+        if self.n_classes > MAX_N_CLASSES:
+            self.logger.info('\nPlotting only for max {} classes\n'.format(MAX_N_CLASSES))
+            return
 
         (title, xlabel, ylabel) = \
             ('Confusion matrix (precision)', 'True label', 'Predicted label') if precision \
@@ -256,7 +265,10 @@ class Evaluation:
     def _plot_correct_wrong_examples(self):
         """Plots correct and wrong examples for each label in test set."""
         assert self.show_plots, 'Plotting is only possible when in ipython-mode'
-        assert self.n_classes <= MAX_N_CLASSES, 'Plotting only for max {} classes'.format(MAX_N_CLASSES)
+
+        if self.n_classes > MAX_N_CLASSES:
+            self.logger.info('\nPlotting only for max {} classes\n'.format(MAX_N_CLASSES))
+            return
 
         for i in range(len(self.classes)):
             c, w = self.get_correct_wrong_examples(label=i)
