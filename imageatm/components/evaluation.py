@@ -350,7 +350,7 @@ class Evaluation:
         return correct, wrong
 
     def visualize_images(
-        self, image_list: TYPE_IMAGE_LIST, title: str, show_heatmap: bool = False, n_plot: int = 20
+        self, image_list: TYPE_IMAGE_LIST, title: str = 'Images for visualisation', show_heatmap: bool = False, n_plot: int = 20
     ):
         """Visualizes images in a sample list.
 
