@@ -12,8 +12,9 @@ train:
 
 evaluate:
   run: True
+  kernel_name: imageatm
   report_html: True
-  repor_pdf: False
+  report_pdf: False
 
 cloud:
   cloud_tag: image_atm_example_tag

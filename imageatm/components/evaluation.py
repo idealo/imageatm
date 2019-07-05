@@ -275,7 +275,7 @@ class Evaluation:
             self.visualize_images(c, title='Label: "{}" (correct predicted)'.format(self.classes[i]), show_heatmap=True, n_plot=3)
             self.visualize_images(w, title='Label: "{}" (wrong predicted)'.format(self.classes[i]), show_heatmap=True, n_plot=3)
 
-    def _create_report(self, report_html:bool, report_pdf:bool):
+    def _create_report(self, kernel_name:str, report_html:bool, report_pdf:bool):
         """Creates report from notebook-template and stores it in different formats all figures.
 
             - Jupyter Notebook
@@ -296,7 +296,7 @@ class Evaluation:
                 image_dir=str(self.image_dir),
                 job_dir=str(self.job_dir)
             ),
-            kernel_name='image-atm'
+            kernel_name=kernel_name
         )
 
         if report_html:
@@ -403,7 +403,7 @@ class Evaluation:
 
             plt.show()
 
-    def run(self, report_html: bool = False, report_pdf: bool = False):
+    def run(self, kernel_name: str = 'imageatm', report_html: bool = False, report_pdf: bool = False):
         """Runs evaluation pipeline on the best model found in job directory for the specific test set:
 
             - Makes prediction on test set
@@ -439,4 +439,4 @@ class Evaluation:
 
         else:
             self.logger.info('\n****** Create Jupyter Notebook (this may take a while) ******\n')
-            self._create_report(report_html, report_pdf)
+            self._create_report(kernel_name, report_html, report_pdf)

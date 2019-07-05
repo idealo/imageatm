@@ -42,7 +42,13 @@ def test_update_config():
     assert result.train == {'cloud': False, 'image_dir': 'test_image', 'job_dir': 'test_job'}
     assert result.dataprep == {'resize': False, 'image_dir': 'test_image', 'job_dir': 'test_job'}
     assert result.cloud == {'job_dir': 'test_job'}
-    assert result.evaluate == {'image_dir': 'test_image', 'job_dir': 'test_job', 'report_html': False, 'report_pdf': False}
+    assert result.evaluate == {
+        'image_dir': 'test_image',
+        'job_dir': 'test_job',
+        'kernel_name': 'imageatm',
+        'report_html': False,
+        'report_pdf': False
+    }
 
     # check that config file gets populated correctly
     TEST_CONFIG_FILE = p.resolve().parent / 'test_configs' / 'config_train.yml'
@@ -80,6 +86,7 @@ def test_update_config():
         'run': False,
         'image_dir': 'test_train/images',
         'job_dir': 'test_train/job_dir',
+        'kernel_name': 'imageatm',
         'report_pdf': False,
         'report_html': False,
     }
@@ -130,6 +137,7 @@ def test_update_config():
         'run': False,
         'image_dir': 'test_image',
         'job_dir': 'test_job',
+        'kernel_name': 'imageatm',
          'report_pdf': False,
          'report_html': False,
     }

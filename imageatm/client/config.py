@@ -57,6 +57,7 @@ def update_config(
     epochs_train_all: Optional[int] = None,
     base_model_name: Optional[str] = None,
     cloud_tag: Optional[str] = None,
+    kernel_name: Optional[str] = None,
     report_html:  Optional[bool] = None,
     report_pdf: Optional[bool] = None,
 ) -> Config:
@@ -147,6 +148,9 @@ def update_config(
     if cloud_tag is not None:
         config.cloud['cloud_tag'] = cloud_tag
 
+    if kernel_name is not None:
+        config.evaluate['kernel_name'] = kernel_name
+
     if report_html is True:
         config.evaluate['report_html'] = True
 
@@ -205,6 +209,7 @@ def val_train(config: dict) -> List[str]:
 def val_evaluate(config: dict) -> List[str]:
     required_keys = ['image_dir', 'job_dir', 'run']
     optional_keys: list = [
+        'kernel_name',
         'report_html',
         'report_pdf',
     ]
