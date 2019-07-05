@@ -222,8 +222,7 @@ class TestEvaluation(object):
         mock_plt_show = mocker.patch('matplotlib.pyplot.show')
 
         global eval
-        eval.save_plots = False
-        eval.show_plots = True
+        eval.mode_ipython = True
         eval.class_mapping = {'0': 0, '1': 1}
         eval.y_true = [0, 0, 0, 1]
         eval.y_pred = [1, 0, 0, 0]
@@ -249,8 +248,7 @@ class TestEvaluation(object):
         mock_plt_show = mocker.patch('matplotlib.pyplot.show')
 
         global eval
-        eval.save_plots = True
-        eval.show_plots = False
+        eval.mode_ipython = True
         correct, wrong = eval.get_correct_wrong_examples(0)
 
         eval.visualize_images(correct, show_heatmap=False)
@@ -274,8 +272,7 @@ class TestEvaluation(object):
         mocker.patch('imageatm.handlers.image_classifier.ImageClassifier.get_preprocess_input')
 
         global eval
-        eval.save_plots = True
-        eval.show_plots = False
+        eval.mode_ipython = True
         correct, wrong = eval.get_correct_wrong_examples(0)
 
         eval.visualize_images(correct, show_heatmap=True)
