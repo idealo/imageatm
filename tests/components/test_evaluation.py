@@ -182,8 +182,16 @@ class TestEvaluation(object):
         npt.assert_array_equal(eval.y_pred, [1, 0, 0])
         mp_proba.assert_called_with(predictions_dist=[[0.3, 0.85], [0.7, 0.2], [0.5, 0.3]])
 
-    def test__calc_classification_report(self, mocker):
-        mp_cr = mocker.patch('imageatm.components.evaluation.classification_report')
+    def test__plot_classification_report(self, mocker):
+        mp_cr = mocker.patch(
+            'imageatm.components.evaluation.classification_report',
+            return_value= {
+                '0': { 'precision':0.5, 'recall':1.0, 'f1-score':0.67, 'support':1},
+                '1': { 'precision':0.5, 'recall':1.0, 'f1-score':0.67, 'support':1},
+                'macro avg': {'precision': 0.5, 'recall': 1.0, 'f1-score': 0.67, 'support': 1},
+                'weighted avg': {'precision': 0.5, 'recall': 1.0, 'f1-score': 0.67, 'support': 1}
+            }
+        )
 
         global eval
         eval.mode_ipython = True
@@ -194,7 +202,7 @@ class TestEvaluation(object):
         eval._plot_classification_report()
 
         assert eval.accuracy == 0.75
-        mp_cr.assert_called_with(y_true=eval.y_true, y_pred=eval.y_pred, target_names=eval.classes)
+        mp_cr.assert_called_with(y_true=eval.y_true, y_pred=eval.y_pred, target_names=eval.classes, output_dict=True)
 
         eval.y_pred = [0, 1, 1, 0]
         eval.y_true = [1, 1, 1, 1]
