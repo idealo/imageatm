@@ -84,16 +84,16 @@ class Evaluation:
 
         try:
             __IPYTHON__
-            self.show_plots = True
-            self.save_plots = False
+            self.mode_ipython = True
+
         except NameError:
+            self.mode_ipython = False
+
+            ## TODO: Is this obsolete? Please remove!
             # Suppress figure window in terminal
             # https://matplotlib.org/faq/howto_faq.html#generate-images-without-having-a-window-appear
             import matplotlib
-
             matplotlib.use('Agg')
-            self.show_plots = False
-            self.save_plots = True
 
     def _load_best_model(self):
         """Loads best performing model from job_dir."""
@@ -154,7 +154,7 @@ class Evaluation:
 
     def _plot_test_set_distribution(self, figsize: (float, float) = [8, 5]):
         """Plots bars with number of samples for each label in test set."""
-        assert self.show_plots, 'Plotting is only possible when in ipython-mode'
+        assert self.mode_ipython, 'Plotting is only possible when in ipython-mode'
 
         if self.n_classes > MAX_N_CLASSES:
             self.logger.info('\nPlotting only for max {} classes\n'.format(MAX_N_CLASSES))
@@ -176,7 +176,7 @@ class Evaluation:
 
     def _plot_classification_report(self, figsize: (float, float) = [5, 8]):
         """Plots classification report on prediction on test set."""
-        assert self.show_plots, 'Plotting is only possible when in ipython-mode'
+        assert self.mode_ipython, 'Plotting is only possible when in ipython-mode'
 
         if self.n_classes > MAX_N_CLASSES:
             self.logger.info('\nPlotting only for max {} classes\n'.format(MAX_N_CLASSES))
@@ -224,7 +224,7 @@ class Evaluation:
 
     def _plot_confusion_matrix(self, figsize: (float, float) = [9, 9], precision: bool = False):
         """Plots normalized confusion matrix."""
-        assert self.show_plots, 'Plotting is only possible when in ipython-mode'
+        assert self.mode_ipython, 'Plotting is only possible when in ipython-mode'
 
         if self.n_classes > MAX_N_CLASSES:
             self.logger.info('\nPlotting only for max {} classes\n'.format(MAX_N_CLASSES))
@@ -264,7 +264,7 @@ class Evaluation:
 
     def _plot_correct_wrong_examples(self):
         """Plots correct and wrong examples for each label in test set."""
-        assert self.show_plots, 'Plotting is only possible when in ipython-mode'
+        assert self.mode_ipython, 'Plotting is only possible when in ipython-mode'
 
         if self.n_classes > MAX_N_CLASSES:
             self.logger.info('\nPlotting only for max {} classes\n'.format(MAX_N_CLASSES))
@@ -282,7 +282,7 @@ class Evaluation:
             - HTML
             - PDF
         """
-        assert self.save_plots, 'Create report is only possible when not in ipython-mode'
+        assert self.mode_ipython, 'Create report is only possible when not in ipython-mode'
 
         filepath_template = dirname(imageatm.notebooks.__file__) + '/evaluation_template.ipynb'
         filepath_notebook = self.evaluation_dir / 'evaluation_report.ipynb'
@@ -359,6 +359,8 @@ class Evaluation:
             show_heatmap: boolean (generates a gradient based class activation map (grad-CAM), default False).
             n_plot: maximum number of plots to be shown (default 20).
         """
+        assert self.mode_ipython, 'Plotting is only possible when in ipython-mode'
+
         if len(image_list) == 0:
             print('Empty list.')
             return
@@ -412,11 +414,11 @@ class Evaluation:
 
            If not in ipython an evaluation report is created.
 
-       Args:
+        Args:
             report_html: boolean (creates a report in html).
             report_pdf: boolean (creates a report in pdf).
         """
-        if self.show_plots:
+        if self.mode_ipython:
             self.logger.info('\n****** Make prediction on test set ******\n')
             self._make_prediction_on_test_set()
 
@@ -435,6 +437,6 @@ class Evaluation:
             self.logger.info('\n****** Plot correct and wrong examples ******\n')
             self._plot_correct_wrong_examples()
 
-        if self.save_plots:
+        else:
             self.logger.info('\n****** Create Jupyter Notebook (this may take a while) ******\n')
             self._create_report(report_html, report_pdf)
