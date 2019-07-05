@@ -30,7 +30,7 @@ def test_update_config():
     assert result.train == {'cloud': False}
     assert result.dataprep == {'resize': False}
     assert result.cloud == {}
-    assert result.evaluate == {}
+    assert result.evaluate == {'report_html': False, 'report_pdf': False}
 
     # check that defaults, image_dir, and job_dir are being set
     config = Config()
@@ -42,7 +42,7 @@ def test_update_config():
     assert result.train == {'cloud': False, 'image_dir': 'test_image', 'job_dir': 'test_job'}
     assert result.dataprep == {'resize': False, 'image_dir': 'test_image', 'job_dir': 'test_job'}
     assert result.cloud == {'job_dir': 'test_job'}
-    assert result.evaluate == {'image_dir': 'test_image', 'job_dir': 'test_job'}
+    assert result.evaluate == {'image_dir': 'test_image', 'job_dir': 'test_job', 'report_html': False, 'report_pdf': False}
 
     # check that config file gets populated correctly
     TEST_CONFIG_FILE = p.resolve().parent / 'test_configs' / 'config_train.yml'
@@ -80,6 +80,8 @@ def test_update_config():
         'run': False,
         'image_dir': 'test_train/images',
         'job_dir': 'test_train/job_dir',
+        'report_pdf': False,
+        'report_html': False,
     }
 
     # test that options overwrite config file
@@ -124,7 +126,13 @@ def test_update_config():
         'cloud_tag': 'test_user',
     }
 
-    assert result.evaluate == {'run': False, 'image_dir': 'test_image', 'job_dir': 'test_job'}
+    assert result.evaluate == {
+        'run': False,
+        'image_dir': 'test_image',
+        'job_dir': 'test_job',
+         'report_pdf': False,
+         'report_html': False,
+    }
 
 
 def test_get_diff():

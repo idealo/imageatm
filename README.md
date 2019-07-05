@@ -66,6 +66,13 @@ evaluator = Evaluation(image_dir=dp.image_dir, job_dir=dp.job_dir)
 evaluator.run()
 ```
 
+## Test
+Test execution is triggered by these commands:
+```
+pip install -e ".[tests, docs]"
+pytest -vs --cov=imageatm --show-capture=no --disable-pytest-warnings tests/
+```
+
 ## Transfer learning
 The following pretrained CNNs from Keras can be used for transfer learning in Image-ATM:
 

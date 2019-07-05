@@ -74,9 +74,6 @@ class TestArgFlow(object):
     def test_evaluate(self):
         config = Config()
 
-        assert not list(TEST_JOB_DIR.glob('*/confusion_matrix.pdf'))
-        assert not list(TEST_JOB_DIR.glob('*/test_set_distribution.pdf'))
-
         evaluate(config, config_file=TEST_CONFIG_EVAL)
 
         assert config.dataprep['run'] == False
@@ -86,8 +83,6 @@ class TestArgFlow(object):
         assert config.evaluate['run'] == True
         assert config.evaluate['job_dir'] == str(TEST_JOB_DIR)
         assert config.evaluate['image_dir'] == str(TEST_IMAGE_DIR_RES)
-        assert list(TEST_JOB_DIR.glob('*/confusion_matrix.pdf'))
-        assert list(TEST_JOB_DIR.glob('*/test_set_distribution.pdf'))
 
     def test_pipeline(self):
         config = Config()
@@ -115,6 +110,4 @@ class TestArgFlow(object):
         assert config.cloud['destroy'] == True
         assert config.cloud['cloud_tag'] == 'test_user'
 
-        assert list(TEST_JOB_DIR.glob('*/confusion_matrix.pdf'))
-        assert list(TEST_JOB_DIR.glob('*/test_set_distribution.pdf'))
         assert list(Path(TEST_JOB_DIR / 'models').glob('*.hdf5'))
