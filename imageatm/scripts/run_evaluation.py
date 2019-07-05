@@ -1,6 +1,6 @@
 from imageatm.components import Evaluation
 
 
-def run_evaluation(image_dir: str, job_dir: str, **kwargs):
+def run_evaluation(image_dir: str, job_dir: str, report_pdf: bool = False, report_html: bool = False, **kwargs):
     eval = Evaluation(image_dir=image_dir, job_dir=job_dir, **kwargs)
-    eval.run()
+    eval.run(report_pdf=report_pdf, report_html=report_html)

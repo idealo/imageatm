@@ -109,7 +109,7 @@ class Evaluation:
 
     def _create_evaluation_dir(self):
         """Creates evaluation dir for reporting."""
-        if self.save_plots:
+        if not self.mode_ipython:
             evaluation_dir_name = self.best_model_file.name.split('.hdf5')[0]
             self.evaluation_dir = self.job_dir / 'evaluation_{}'.format(evaluation_dir_name)
 
@@ -282,7 +282,7 @@ class Evaluation:
             - HTML
             - PDF
         """
-        assert self.mode_ipython, 'Create report is only possible when not in ipython-mode'
+        assert not self.mode_ipython, 'Create report is only possible when not in ipython-mode'
 
         filepath_template = dirname(imageatm.notebooks.__file__) + '/evaluation_template.ipynb'
         filepath_notebook = self.evaluation_dir / 'evaluation_report.ipynb'
