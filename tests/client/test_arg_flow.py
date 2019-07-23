@@ -11,6 +11,7 @@ TEST_CONFIG_PIPE = p.resolve().parent / 'test_configs' / 'config_arg_flow_all.ym
 TEST_CONFIG_DATAPREP = p.resolve().parent / 'test_configs' / 'config_arg_flow_dataprep.yml'
 TEST_CONFIG_TRAIN = p.resolve().parent / 'test_configs' / 'config_arg_flow_train.yml'
 TEST_CONFIG_EVAL = p.resolve().parent / 'test_configs' / 'config_arg_flow_eval.yml'
+TEST_NB_TEMPLATE = p.resolve().parent / 'test_notebooks' / 'evaluation_template.ipynb'
 
 TEST_SAMPLES = Path('tests/data/test_samples/test_arg_flow.json')
 TEST_IMAGE_DIR = Path('tests/data/test_images')
@@ -74,7 +75,7 @@ class TestArgFlow(object):
 
     def test_evaluate(self, mocker):
         def fake_execute_notebook(*args, **kwargs):
-            filepath_template = dirname(imageatm.notebooks.__file__) + '/evaluation_template.ipynb'
+            filepath_template = TEST_NB_TEMPLATE
             filepath_notebook = TEST_JOB_DIR / 'evaluation_model_mobilenet_01_0.500/evaluation_report.ipynb'
             shutil.copy(filepath_template, filepath_notebook)
 
@@ -95,7 +96,7 @@ class TestArgFlow(object):
     def test_pipeline(self, mocker):
 
         def fake_execute_notebook(*args, **kwargs):
-            filepath_template = dirname(imageatm.notebooks.__file__) + '/evaluation_template.ipynb'
+            filepath_template = TEST_NB_TEMPLATE
             filepath_notebook = TEST_JOB_DIR / 'evaluation_model_mobilenet_01_0.500/evaluation_report.ipynb'
             shutil.copy(filepath_template, filepath_notebook)
 
