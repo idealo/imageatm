@@ -81,19 +81,21 @@ class Evaluation:
         self.fontsize_title = 16 if self.n_classes < 4 else 18
         self.fontsize_label = 12 if self.n_classes < 4 else 14
         self.fontsize_ticks = 9 if self.n_classes < 4 else 12
+        self.mode_ipython = True if self._is_in_ipython_mode() else False
 
+    def _is_in_ipython_mode(self):
         try:
             __IPYTHON__
-            self.mode_ipython = True
+            return True
 
         except NameError:
-            self.mode_ipython = False
-
             ## TODO: Is this obsolete? Please remove!
             # Suppress figure window in terminal
             # https://matplotlib.org/faq/howto_faq.html#generate-images-without-having-a-window-appear
             import matplotlib
             matplotlib.use('Agg')
+
+            return False
 
     def _load_best_model(self):
         """Loads best performing model from job_dir."""
@@ -282,7 +284,7 @@ class Evaluation:
             - HTML
             - PDF
         """
-        assert not self.mode_ipython, 'Create report is only possible when not in ipython-mode'
+        assert not self.mode_ipython, 'Create report is only possible when not in ipython mode'
 
         filepath_template = dirname(imageatm.notebooks.__file__) + '/evaluation_template.ipynb'
         filepath_notebook = self.evaluation_dir / 'evaluation_report.ipynb'
@@ -299,6 +301,9 @@ class Evaluation:
             kernel_name=kernel_name
         )
 
+        with open(filepath_notebook) as f:
+            nb = nbformat.read(f, as_version=4)
+
         if report_html:
             self.logger.info('\n****** Create HTML ******\n')
             with open(filepath_notebook) as f:
@@ -313,8 +318,13 @@ class Evaluation:
 
         if report_pdf:
             self.logger.info('\n****** Create PDF ******\n')
+
             pdf_exporter = PDFExporter()
-            pdf_data, resources = pdf_exporter.from_notebook_node(nb)
+            # pdf_exporter.template_path.append(dirname(imageatm.notebooks.__file__))
+            pdf_exporter.template_file = 'report.tplx'
+            pdf_data, resources = pdf_exporter.from_notebook_node(nb, resources={
+                'metadata': {'name': 'Evaluation Report'}
+            })
 
             with open(filepath_pdf, 'wb') as f:
                 f.write(pdf_data)
@@ -412,7 +422,7 @@ class Evaluation:
             - Plots confusion matrix (on precsion and on recall)
             - Plots correct and wrong examples
 
-           If not in ipython an evaluation report is created.
+           If not in ipython mode an evaluation report is created.
 
         Args:
             report_html: boolean (creates a report in html).
