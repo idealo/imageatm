@@ -194,6 +194,7 @@ def evaluate(
     config_file: Optional[Path] = None,
     image_dir: Optional[Path] = None,
     job_dir: Optional[Path] = None,
+    kernel_name: Optional[str] = None,
     report_html: Optional[bool] = None,
     report_pdf: Optional[bool] = None,
 ):
@@ -202,6 +203,7 @@ def evaluate(
         config_file=config_file,
         job_dir=job_dir,
         image_dir=image_dir,
+        kernel_name=kernel_name,
         report_html=report_html,
         report_pdf=report_pdf,
     )

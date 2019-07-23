@@ -425,6 +425,7 @@ class Evaluation:
            If not in ipython mode an evaluation report is created.
 
         Args:
+            kernel_name: str (name of ipython kernel)
             report_html: boolean (creates a report in html).
             report_pdf: boolean (creates a report in pdf).
         """
