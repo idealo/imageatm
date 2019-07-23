@@ -3,7 +3,8 @@ import shutil
 from pathlib import Path
 from imageatm.client.client import Config
 from imageatm.client.commands import pipeline, train, evaluate, dataprep
-
+from os.path import dirname
+import imageatm.notebooks
 
 p = Path(__file__)
 TEST_CONFIG_PIPE = p.resolve().parent / 'test_configs' / 'config_arg_flow_all.yml'
@@ -71,7 +72,14 @@ class TestArgFlow(object):
 
         assert list(Path(TEST_JOB_DIR / 'models').glob('*.hdf5'))
 
-    def test_evaluate(self):
+    def test_evaluate(self, mocker):
+        def fake_execute_notebook(*args, **kwargs):
+            filepath_template = dirname(imageatm.notebooks.__file__) + '/evaluation_template.ipynb'
+            filepath_notebook = TEST_JOB_DIR / 'evaluation_model_mobilenet_01_0.500/evaluation_report.ipynb'
+            shutil.copy(filepath_template, filepath_notebook)
+
+        mocker.patch('papermill.execute_notebook', side_effect=fake_execute_notebook)
+
         config = Config()
 
         evaluate(config, config_file=TEST_CONFIG_EVAL)
@@ -84,7 +92,15 @@ class TestArgFlow(object):
         assert config.evaluate['job_dir'] == str(TEST_JOB_DIR)
         assert config.evaluate['image_dir'] == str(TEST_IMAGE_DIR_RES)
 
-    def test_pipeline(self):
+    def test_pipeline(self, mocker):
+
+        def fake_execute_notebook(*args, **kwargs):
+            filepath_template = dirname(imageatm.notebooks.__file__) + '/evaluation_template.ipynb'
+            filepath_notebook = TEST_JOB_DIR / 'evaluation_model_mobilenet_01_0.500/evaluation_report.ipynb'
+            shutil.copy(filepath_template, filepath_notebook)
+
+        mocker.patch('papermill.execute_notebook', side_effect=fake_execute_notebook)
+
         config = Config()
 
         pipeline(config, config_file=TEST_CONFIG_PIPE)

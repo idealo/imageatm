@@ -12,6 +12,7 @@ train:
 
 evaluate:
   run: True
+  kernel_name: any_kernel
 
 cloud:
   run: False
