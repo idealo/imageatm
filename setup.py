@@ -39,6 +39,7 @@ setup(
     extras_require={
         'tests': ['pytest==4.3.0', 'pytest-cov==2.6.1', 'pytest-mock', 'mock', 'mypy'],
         'docs': ['mkdocs==1.0.4', 'mkdocs-material==4.0.2'],
+        'dev': ['bumpversion==0.5.3'],
     },
     classifiers=[
         'Development Status :: 4 - Beta',
