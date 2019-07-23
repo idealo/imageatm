@@ -65,6 +65,7 @@ def update_config(
     # set defaults
     config.train['cloud'] = False
     config.dataprep['resize'] = False
+    config.evaluate['kernel_name'] = 'imageatm'
     config.evaluate['report_html'] = False
     config.evaluate['report_pdf'] = False
     config.pipeline = []

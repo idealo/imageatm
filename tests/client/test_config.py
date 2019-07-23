@@ -27,10 +27,18 @@ def test_update_config():
 
     result = update_config(config)
 
-    assert result.train == {'cloud': False}
-    assert result.dataprep == {'resize': False}
+    assert result.train == {
+        'cloud': False
+    }
+    assert result.dataprep == {
+        'resize': False
+    }
     assert result.cloud == {}
-    assert result.evaluate == {'report_html': False, 'report_pdf': False}
+    assert result.evaluate == {
+        'kernel_name': 'imageatm',
+        'report_html': False,
+        'report_pdf': False
+    }
 
     # check that defaults, image_dir, and job_dir are being set
     config = Config()
@@ -39,9 +47,19 @@ def test_update_config():
 
     result = update_config(config)
 
-    assert result.train == {'cloud': False, 'image_dir': 'test_image', 'job_dir': 'test_job'}
-    assert result.dataprep == {'resize': False, 'image_dir': 'test_image', 'job_dir': 'test_job'}
-    assert result.cloud == {'job_dir': 'test_job'}
+    assert result.train == {
+        'cloud': False,
+        'image_dir': 'test_image',
+        'job_dir': 'test_job'
+    }
+    assert result.dataprep == {
+        'resize': False,
+        'image_dir': 'test_image',
+        'job_dir': 'test_job'
+    }
+    assert result.cloud == {
+        'job_dir': 'test_job'
+    }
     assert result.evaluate == {
         'image_dir': 'test_image',
         'job_dir': 'test_job',
