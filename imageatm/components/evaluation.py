@@ -320,8 +320,7 @@ class Evaluation:
             self.logger.info('\n****** Create PDF ******\n')
 
             pdf_exporter = PDFExporter()
-            # pdf_exporter.template_path.append(dirname(imageatm.notebooks.__file__))
-            pdf_exporter.template_file = 'report.tplx'
+            pdf_exporter.template_file = dirname(imageatm.notebooks.__file__) + '/tex_templates/evaluation_report.tplx'
             pdf_data, resources = pdf_exporter.from_notebook_node(nb, resources={
                 'metadata': {'name': 'Evaluation Report'}
             })
