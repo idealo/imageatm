@@ -167,6 +167,7 @@ class Evaluation:
         title = 'Number of images in test set: {}'.format(len(self.samples_test))
 
         fig = plt.figure(figsize=figsize)
+        plt.rcParams["axes.grid"] = True
         plt.bar(x_tick_marks, y_values)
         plt.title(title, fontsize=self.fontsize_title)
         plt.xlabel('Label', fontsize=self.fontsize_label)
@@ -202,6 +203,7 @@ class Evaluation:
         title = 'Accuracy on prediction test set: {}'.format(round(self.accuracy * 100, 2))
 
         fig = plt.figure(figsize=figsize)
+        plt.rcParams["axes.grid"] = False
         plt.imshow(plotMatArray, interpolation='nearest', cmap=plt.cm.Blues, vmin=0, vmax=1)
         plt.colorbar()
         plt.title(title, fontsize=self.fontsize_title)
@@ -242,6 +244,7 @@ class Evaluation:
         tick_marks = np.arange(self.n_classes)
 
         fig = plt.figure(figsize=figsize)
+        plt.rcParams["axes.grid"] = False
         plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues, vmin=0, vmax=1)
         plt.colorbar()
         plt.title(title, fontsize=self.fontsize_title)
