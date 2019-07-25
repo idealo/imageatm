@@ -123,7 +123,7 @@ with open('data.json', 'w') as outfile:
 ### Train with CLI
 Define your `config_file.yml`:
 ``` yaml
-image_dir: cats_and_dogs/train
+image_dir: cats_and_dogs/train/
 job_dir: cats_and_dogs_job_dir/
 
 dataprep:
@@ -136,6 +136,9 @@ train:
 
 evaluate:
   run: True
+  kernel_name: imageatm
+  report_html: True
+  report_pdf: True
 ```
 
 These configurations will run three components in a pipeline: data preparation, training, and evaluation.
@@ -164,7 +167,13 @@ root
         ├── val_samples.json
         ├── logs
         ├── models
+        │   ├── model_1.hdf5
+        │   ├── model_2.hdf5
+        │   └── model_3.hdf5
         └── evaluation
+            ├── evaluation_report.html
+            ├── evaluation_report.ipynb
+            └── evaluation_report.pdf
 ```
 
 ### Train without CLI
