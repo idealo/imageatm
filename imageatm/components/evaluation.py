@@ -100,14 +100,18 @@ class Evaluation:
     def _load_best_model(self):
         """Loads best performing model from job_dir."""
         self.logger.info('\n****** Load model ******\n')
-
-        job_path = self.job_dir / 'models'
-        model_files = list(job_path.glob('**/*.hdf5'))
-        max_acc_idx = np.argmax([m.name.split('_')[3][:5] for m in model_files])
-        self.best_model_file = Path(model_files[max_acc_idx]).resolve()
+        best_model_file = self._determine_best_modelfile()
+        self.best_model_file = Path(best_model_file).resolve()
         self.best_model = load_model(self.best_model_file)
 
         self.logger.info('loaded {}'.format(self.best_model_file))
+
+    def _determine_best_modelfile(self):
+        """Determines best performing model from job_dir."""
+        job_path = self.job_dir / 'models'
+        model_files = list(job_path.glob('**/*.hdf5'))
+        max_acc_idx = np.argmax([m.name.split('_')[3][:5] for m in model_files])
+        return model_files[max_acc_idx]
 
     def _create_evaluation_dir(self):
         """Creates evaluation dir for reporting."""

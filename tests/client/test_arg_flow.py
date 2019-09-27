@@ -3,6 +3,7 @@ import shutil
 from pathlib import Path
 from imageatm.client.client import Config
 from imageatm.client.commands import pipeline, train, evaluate, dataprep
+from imageatm.components.evaluation import Evaluation
 from os.path import dirname
 import imageatm.notebooks
 
@@ -80,7 +81,8 @@ class TestArgFlow(object):
             shutil.copy(filepath_template, filepath_notebook)
 
         mocker.patch('papermill.execute_notebook', side_effect=fake_execute_notebook)
-        mocker.patch('numpy.argmax', return_value=0)
+        mocker.patch('imageatm.components.evaluation.Evaluation._determine_best_modelfile',
+                     return_value=TEST_JOB_DIR / 'models/model_mobilenet_01_0.500.hdf5')
 
         config = Config()
 
@@ -102,7 +104,8 @@ class TestArgFlow(object):
             shutil.copy(filepath_template, filepath_notebook)
 
         mocker.patch('papermill.execute_notebook', side_effect=fake_execute_notebook)
-        mocker.patch('numpy.argmax', return_value=0)
+        mocker.patch('imageatm.components.evaluation.Evaluation._determine_best_modelfile',
+                     return_value=TEST_JOB_DIR / 'models/model_mobilenet_01_0.500.hdf5')
 
         config = Config()
 
