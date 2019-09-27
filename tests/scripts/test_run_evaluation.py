@@ -9,6 +9,12 @@ TEST_IMAGE_DIR = Path('./tests/data/test_images').resolve()
 TEST_JOB_DIR = Path('./tests/data/test_train_job').resolve()
 TEST_BATCH_SIZE = 16
 TEST_BASE_MODEL_NAME = 'MobileNet'
+TEST_CONFIG_EVALUATION_REPORT = {
+    "create": True,
+    "kernel_name": "any_kernel",
+    "export_html": True,
+    "export_pdf": True,
+}
 
 
 class TestRunEvaluation(object):
@@ -21,6 +27,7 @@ class TestRunEvaluation(object):
         run_evaluation(
             image_dir=TEST_IMAGE_DIR,
             job_dir=TEST_JOB_DIR,
+            report=TEST_CONFIG_EVALUATION_REPORT,
             batch_size=TEST_BATCH_SIZE,
             base_model_name=TEST_BASE_MODEL_NAME,
         )
@@ -32,5 +39,5 @@ class TestRunEvaluation(object):
             base_model_name=TEST_BASE_MODEL_NAME,
         )
 
-        run_evaluation(image_dir=TEST_IMAGE_DIR, job_dir=TEST_JOB_DIR)
+        run_evaluation(image_dir=TEST_IMAGE_DIR, job_dir=TEST_JOB_DIR, report=TEST_CONFIG_EVALUATION_REPORT)
         Evaluation.__init__.assert_called_with(image_dir=TEST_IMAGE_DIR, job_dir=TEST_JOB_DIR)

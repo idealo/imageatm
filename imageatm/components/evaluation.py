@@ -280,7 +280,7 @@ class Evaluation:
             self.visualize_images(c, title='Label: "{}" (correct predicted)'.format(self.classes[i]), show_heatmap=True, n_plot=3)
             self.visualize_images(w, title='Label: "{}" (wrong predicted)'.format(self.classes[i]), show_heatmap=True, n_plot=3)
 
-    def _create_report(self, kernel_name:str, report_html:bool, report_pdf:bool):
+    def _create_report(self, report_kernel_name:str, report_export_html:bool, report_export_pdf:bool):
         """Creates report from notebook-template and stores it in different formats all figures.
 
             - Jupyter Notebook
@@ -301,13 +301,13 @@ class Evaluation:
                 image_dir=str(self.image_dir),
                 job_dir=str(self.job_dir)
             ),
-            kernel_name=kernel_name
+            kernel_name=report_kernel_name
         )
 
         with open(filepath_notebook) as f:
             nb = nbformat.read(f, as_version=4)
 
-        if report_html:
+        if report_export_html:
             self.logger.info('\n****** Create HTML ******\n')
             with open(filepath_notebook) as f:
                 nb = nbformat.read(f, as_version=4)
@@ -319,7 +319,7 @@ class Evaluation:
                 f.write(html_data)
                 f.close()
 
-        if report_pdf:
+        if report_export_pdf:
             self.logger.info('\n****** Create PDF ******\n')
 
             pdf_exporter = PDFExporter()
@@ -415,7 +415,12 @@ class Evaluation:
 
             plt.show()
 
-    def run(self, kernel_name: str = 'imageatm', report_html: bool = False, report_pdf: bool = False):
+    def run(self,
+            report_create: bool = False,
+            report_kernel_name: str = 'imageatm',
+            report_export_html: bool = False,
+            report_export_pdf: bool = False
+        ):
         """Runs evaluation pipeline on the best model found in job directory for the specific test set:
 
             - Makes prediction on test set
@@ -427,9 +432,10 @@ class Evaluation:
            If not in ipython mode an evaluation report is created.
 
         Args:
-            kernel_name: str (name of ipython kernel)
-            report_html: boolean (creates a report in html).
-            report_pdf: boolean (creates a report in pdf).
+        	report_create: boolean (create ipython kernel)
+            report_kernel_name: str (name of ipython kernel)
+            report_export_html: boolean (exports report to html).
+            report_export_pdf: boolean (exports report to pdf).
         """
         if self.mode_ipython:
             self.logger.info('\n****** Make prediction on test set ******\n')
@@ -450,6 +456,23 @@ class Evaluation:
             self.logger.info('\n****** Plot correct and wrong examples ******\n')
             self._plot_correct_wrong_examples()
 
+        # elif report_create:
         else:
             self.logger.info('\n****** Create Jupyter Notebook (this may take a while) ******\n')
-            self._create_report(kernel_name, report_html, report_pdf)
+            self._create_report(report_kernel_name, report_export_html, report_export_pdf)
+
+        # else:
+        #     self.logger.info('\n****** Make prediction on test set ******\n')
+        #     self._make_prediction_on_test_set()
+		#
+        #     self.logger.info('\n****** Print distribution on test set ******\n')
+        #     # self._plot_test_set_distribution(figsize=[8, 5])
+		#
+        #     self.logger.info('\n****** Print classification report ******\n')
+        #     # self._plot_classification_report(figsize=[max(5,self.n_classes*0.5), max(8,self.n_classes*0.8)])
+		#
+        #     self.logger.info('\n****** Print confusion matrix (recall) ******\n')
+        #     # self._plot_confusion_matrix(figsize=[max(9,self.n_classes*0.9), max(8,self.n_classes*0.9)])
+		#
+        #     self.logger.info('\n****** Print confusion matrix (precision) ******\n')
+        #     # self._plot_confusion_matrix(figsize=[max(9,self.n_classes*0.9), max(8,self.n_classes*0.9)], precision=True)

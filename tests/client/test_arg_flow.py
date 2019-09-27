@@ -80,6 +80,7 @@ class TestArgFlow(object):
             shutil.copy(filepath_template, filepath_notebook)
 
         mocker.patch('papermill.execute_notebook', side_effect=fake_execute_notebook)
+        mocker.patch('numpy.argmax', return_value=0)
 
         config = Config()
 
@@ -101,6 +102,7 @@ class TestArgFlow(object):
             shutil.copy(filepath_template, filepath_notebook)
 
         mocker.patch('papermill.execute_notebook', side_effect=fake_execute_notebook)
+        mocker.patch('numpy.argmax', return_value=0)
 
         config = Config()
 
@@ -116,6 +118,10 @@ class TestArgFlow(object):
         assert config.train['cloud'] == False
 
         assert config.evaluate['run'] == True
+        assert config.evaluate['report']['create'] == True
+        assert config.evaluate['report']['kernel_name'] == 'any_kernel'
+        assert config.evaluate['report']['export_html'] == True
+        assert config.evaluate['report']['export_pdf'] == True
 
         assert config.cloud['run'] == False
         assert config.cloud['provider'] == 'aws'

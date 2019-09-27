@@ -26,6 +26,10 @@ def pipeline(
     epochs_train_all: Optional[int] = None,
     base_model_name: Optional[str] = None,
     cloud_tag: Optional[str] = None,
+    # report_create: Optional[bool] = None,
+    # report_kernel_name: Optional[str] = None,
+    # report_export_html: Optional[bool] = None,
+    # report_export_pdf: Optional[bool] = None,
 ):
     """Runs the entire pipeline based on config file."""
     config = update_config(
@@ -50,6 +54,10 @@ def pipeline(
         epochs_train_all=epochs_train_all,
         base_model_name=base_model_name,
         cloud_tag=cloud_tag,
+        # report_create=report_create,
+        # report_kernel_name=report_kernel_name,
+        # report_export_html=report_export_html,
+        # report_export_pdf=report_export_pdf,
     )
 
     validate_config(config, config.pipeline)
@@ -194,18 +202,20 @@ def evaluate(
     config_file: Optional[Path] = None,
     image_dir: Optional[Path] = None,
     job_dir: Optional[Path] = None,
-    kernel_name: Optional[str] = None,
-    report_html: Optional[bool] = None,
-    report_pdf: Optional[bool] = None,
+    # report_create: Optional[bool] = None,
+    # report_kernel_name: Optional[str] = None,
+    # report_export_html: Optional[bool] = None,
+    # report_export_pdf: Optional[bool] = None,
 ):
     config = update_config(
         config=config,
         config_file=config_file,
         job_dir=job_dir,
         image_dir=image_dir,
-        kernel_name=kernel_name,
-        report_html=report_html,
-        report_pdf=report_pdf,
+        # report_create=report_create,
+        # report_kernel_name=report_kernel_name,
+        # report_export_html=report_export_html,
+        # report_export_pdf=report_export_pdf,
     )
 
     config.evaluate['run'] = True

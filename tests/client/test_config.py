@@ -35,9 +35,12 @@ def test_update_config():
     }
     assert result.cloud == {}
     assert result.evaluate == {
-        'kernel_name': 'imageatm',
-        'report_html': False,
-        'report_pdf': False
+        'report': {
+            'create': False,
+            'kernel_name': 'imageatm',
+            'export_html': False,
+            'export_pdf': False
+        }
     }
 
     # check that defaults, image_dir, and job_dir are being set
@@ -63,9 +66,12 @@ def test_update_config():
     assert result.evaluate == {
         'image_dir': 'test_image',
         'job_dir': 'test_job',
-        'kernel_name': 'imageatm',
-        'report_html': False,
-        'report_pdf': False
+        'report': {
+            'create': False,
+            'kernel_name': 'imageatm',
+            'export_html': False,
+            'export_pdf': False
+        }
     }
 
     # check that config file gets populated correctly
@@ -104,9 +110,12 @@ def test_update_config():
         'run': False,
         'image_dir': 'test_train/images',
         'job_dir': 'test_train/job_dir',
-        'kernel_name': 'imageatm',
-        'report_pdf': False,
-        'report_html': False,
+        'report': {
+            'create': False,
+            'kernel_name': 'imageatm',
+            'export_html': False,
+            'export_pdf': False
+        }
     }
 
     # test that options overwrite config file
@@ -155,9 +164,12 @@ def test_update_config():
         'run': False,
         'image_dir': 'test_image',
         'job_dir': 'test_job',
-        'kernel_name': 'imageatm',
-         'report_pdf': False,
-         'report_html': False,
+        'report': {
+            'create': False,
+            'kernel_name': 'imageatm',
+            'export_html': False,
+            'export_pdf': False
+        }
     }
 
 

@@ -14,7 +14,12 @@ train:
 
 evaluate:
   run: True
-  kernel_name: any_kernel
+  report:
+    create: True
+    kernel_name: any_kernel
+    export_html: True
+    export_pdf: True
+
 
 cloud:
   run: False

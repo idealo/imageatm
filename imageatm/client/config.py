@@ -47,6 +47,7 @@ def update_config(
     bucket: Optional[str] = None,
     tf_dir: Optional[Path] = None,
     train_cloud: Optional[bool] = None,
+    ## TODO: check if destroy == !no_destroy
     destroy: Optional[bool] = None,
     no_destroy: Optional[bool] = None,
     resize: Optional[bool] = None,
@@ -57,17 +58,21 @@ def update_config(
     epochs_train_all: Optional[int] = None,
     base_model_name: Optional[str] = None,
     cloud_tag: Optional[str] = None,
-    kernel_name: Optional[str] = None,
-    report_html:  Optional[bool] = None,
-    report_pdf: Optional[bool] = None,
+    # report_create: Optional[bool] = None,
+    # report_kernel_name: Optional[str] = None,
+    # report_export_html:  Optional[bool] = None,
+    # report_export_pdf: Optional[bool] = None,
 ) -> Config:
 
     # set defaults
     config.train['cloud'] = False
     config.dataprep['resize'] = False
-    config.evaluate['kernel_name'] = 'imageatm'
-    config.evaluate['report_html'] = False
-    config.evaluate['report_pdf'] = False
+    config.evaluate['report'] = {
+        'create': False,
+        'kernel_name': 'imageatm',
+        'export_html': False,
+        'export_pdf': False
+    }
     config.pipeline = []
 
     # load central config file
@@ -149,15 +154,6 @@ def update_config(
     if cloud_tag is not None:
         config.cloud['cloud_tag'] = cloud_tag
 
-    if kernel_name is not None:
-        config.evaluate['kernel_name'] = kernel_name
-
-    if report_html is True:
-        config.evaluate['report_html'] = True
-
-    if report_pdf is True:
-        config.evaluate['report_pdf'] = True
-
     config = update_component_configs(config)
 
     return config
@@ -208,14 +204,14 @@ def val_train(config: dict) -> List[str]:
 
 
 def val_evaluate(config: dict) -> List[str]:
-    required_keys = ['image_dir', 'job_dir', 'run']
-    optional_keys: list = [
-        'kernel_name',
-        'report_html',
-        'report_pdf',
-    ]
+    required_keys = ['image_dir', 'job_dir', 'report', 'run']
+    optional_keys: list = []
+    msg = get_diff('evaluate', config, required_keys, optional_keys)
 
-    return get_diff('evaluate', config, required_keys, optional_keys)
+    required_keys = ['create', 'kernel_name', 'export_pdf', 'export_html']
+    optional_keys: list = []
+    msg += get_diff('evaluate', config['report'], required_keys, optional_keys)
+    return msg
 
 
 def val_cloud(config: dict) -> List[str]:

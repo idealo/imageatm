@@ -16,4 +16,4 @@ def save_json(data: Union[dict, list], target_file: str):
 
 def load_yaml(file_path: str) -> str:
     with open(file_path, 'r') as f:
-        return yaml.load(f)
+        return yaml.safe_load(f)
