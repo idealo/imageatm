@@ -31,6 +31,7 @@ setup(
         'h5py',
         'matplotlib',
         'papermill',
+        'pandoc',
         'Pillow',
         'scikit-learn',
         'scipy==1.1.*',
