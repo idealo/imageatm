@@ -58,10 +58,10 @@ def update_config(
     epochs_train_all: Optional[int] = None,
     base_model_name: Optional[str] = None,
     cloud_tag: Optional[str] = None,
-    # report_create: Optional[bool] = None,
-    # report_kernel_name: Optional[str] = None,
-    # report_export_html:  Optional[bool] = None,
-    # report_export_pdf: Optional[bool] = None,
+    create_report: Optional[bool] = None,
+    kernel_name: Optional[str] = None,
+    export_html: Optional[bool] = None,
+    export_pdf: Optional[bool] = None,
 ) -> Config:
 
     # set defaults
@@ -150,6 +150,18 @@ def update_config(
 
     if base_model_name is not None:
         config.train['base_model_name'] = base_model_name
+
+    if create_report is not None:
+        config.evaluate['report']['create'] = create_report
+
+    if kernel_name is not None:
+        config.evaluate['report']['kernel_name'] = kernel_name
+
+    if kernel_name is not None:
+        config.evaluate['report']['export_html'] = export_html
+
+    if kernel_name is not None:
+        config.evaluate['report']['export_pdf'] = export_pdf
 
     if cloud_tag is not None:
         config.cloud['cloud_tag'] = cloud_tag

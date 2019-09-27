@@ -11,12 +11,12 @@ train:
   cloud: False
 
 evaluate:
-  run: True        # führt evaluation aus mit output auf stdout
+  run: True
   report:
-    create: True    # jobxyz/report/report.ipynb report.pdf report.html
+    create: True
     kernel_name: any_kernel
-    export_html: True # export as html
-    export_pdf: False # export as pdf
+    export_html: True
+    export_pdf: False
 
 cloud:
   cloud_tag: image_atm_example_tag

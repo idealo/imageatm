@@ -61,6 +61,10 @@ def test_options_available():
         '  --learning-rate-dense FLOAT   Learning rate dense layers.\n'
         '  --learning-rate-all FLOAT     Learning rate all layers.\n'
         '  --base-model-name TEXT        Pretrained CNN to be used for transfer learning.\n'
+        '  --create-report               Create evaluation report via jupyter notebook.\n'
+        '  --kernel-name TEXT            Kernel-name for juypter notebook.\n'
+        '  --export-html                 Export evaluation report to html.\n'
+        '  --export-pdf                  Export evaluation report to pdf.\n'
         '  --cloud-tag TEXT              Tag under which all cloud resources are created.\n'
         '  --help                        Show this message and exit.\n'
     )
@@ -112,6 +116,10 @@ def test_options_available():
         '  --config-file PATH  Central configuration file.\n'
         '  --image-dir PATH    Directory with image files.\n'
         '  --job-dir PATH      Directory with test samples files and trained model.\n'
+        '  --create-report     Create evaluation report via jupyter notebook.\n'
+        '  --kernel-name TEXT  Kernel-name for juypter notebook.\n'
+        '  --export-html       Export evaluation report to html.\n'
+        '  --export-pdf        Export evaluation report to pdf.\n'
         '  --help              Show this message and exit.\n'
     )
     result = runner.invoke(cli, ['evaluate', '--help'])
