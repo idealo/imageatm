@@ -83,6 +83,8 @@ class TestArgFlow(object):
         mocker.patch('papermill.execute_notebook', side_effect=fake_execute_notebook)
         mocker.patch('imageatm.components.evaluation.Evaluation._determine_best_modelfile',
                      return_value=TEST_JOB_DIR / 'models/model_mobilenet_01_0.500.hdf5')
+        mocker.patch('nbconvert.PDFExporter.from_notebook_node',
+                     return_value=('ANY_DATA'.encode(), None))
 
         config = Config()
 
@@ -106,6 +108,8 @@ class TestArgFlow(object):
         mocker.patch('papermill.execute_notebook', side_effect=fake_execute_notebook)
         mocker.patch('imageatm.components.evaluation.Evaluation._determine_best_modelfile',
                      return_value=TEST_JOB_DIR / 'models/model_mobilenet_01_0.500.hdf5')
+        mocker.patch('nbconvert.PDFExporter.from_notebook_node',
+                     return_value=('ANY_DATA'.encode(), None))
 
         config = Config()
 
