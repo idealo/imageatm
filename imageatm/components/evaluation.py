@@ -181,6 +181,16 @@ class Evaluation:
         plt.tight_layout()
         plt.show()
 
+    def _print_test_set_distribution(self):
+        """Prints distribution for labels in test set."""
+        assert not self.mode_ipython, 'Printing is recommended when not in ipython-mode'
+
+        max_length = len(max(self.classes, key=len))
+        y_values = np.bincount(self.y_true)
+        for i, c in enumerate(self.classes):
+            label = c + ' ' * (max_length - len(c))
+            self.logger.info("{}\t{}". format(label, y_values[i]))
+
     def _plot_classification_report(self, figsize: (float, float) = [5, 8]):
         """Plots classification report on prediction on test set."""
         assert self.mode_ipython, 'Plotting is only possible when in ipython-mode'
@@ -230,6 +240,30 @@ class Evaluation:
         plt.tight_layout()
         plt.show()
 
+    def _print_classification_report(self):
+        """Prints classification for labels in test set."""
+        assert not self.mode_ipython, 'Printing is recommended when not in ipython-mode'
+
+        cr = classification_report(
+            y_true=self.y_true, y_pred=self.y_pred, target_names=self.classes, output_dict=True
+        )
+
+        metrics = ['precision', 'recall', 'f1-score', 'support']
+        categories = self.classes.copy()
+        categories.extend(['macro avg', 'weighted avg'])
+
+        max_length = len(max(self.classes, key=len))
+        self.logger.info("{}\t{}\t{}\t{}\t{}". format(' ' * max_length, 'prec', "rec", "f1", "support"))
+        for c in categories:
+            label = c + ' ' * (max_length - len(c))
+            line_output = "{}\t".format(label)
+            for m in metrics:
+                if m == 'support':
+                    line_output += "{}\t".format(cr[c][m])
+                else:
+                    line_output += "{0:.2f}\t".format(cr[c][m])
+            self.logger.info(line_output)
+
     def _plot_confusion_matrix(self, figsize: (float, float) = [9, 9], precision: bool = False):
         """Plots normalized confusion matrix."""
         assert self.mode_ipython, 'Plotting is only possible when in ipython-mode'
@@ -270,6 +304,19 @@ class Evaluation:
 
         plt.tight_layout()
         plt.show()
+
+    def _print_confusion_matrix(self, precision: bool = False):
+        """Prints normalized confusion matrix."""
+        assert not self.mode_ipython, 'Printing is recommended when not in ipython-mode'
+
+        cm = confusion_matrix(y_true=self.y_pred, y_pred=self.y_true) if precision \
+            else confusion_matrix(y_true=self.y_true, y_pred=self.y_pred)
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+
+        max_length = len(max(self.classes, key=len))
+        for i, c in enumerate(self.classes):
+            label = c + ' ' * (max_length - len(c))
+            self.logger.info("{}\t{}". format(label, cm[i]))
 
     def _plot_correct_wrong_examples(self):
         """Plots correct and wrong examples for each label in test set."""
@@ -460,23 +507,22 @@ class Evaluation:
             self.logger.info('\n****** Plot correct and wrong examples ******\n')
             self._plot_correct_wrong_examples()
 
-        # elif report_create:
-        else:
+        elif report_create:
             self.logger.info('\n****** Create Jupyter Notebook (this may take a while) ******\n')
             self._create_report(report_kernel_name, report_export_html, report_export_pdf)
 
-        # else:
-        #     self.logger.info('\n****** Make prediction on test set ******\n')
-        #     self._make_prediction_on_test_set()
-		#
-        #     self.logger.info('\n****** Print distribution on test set ******\n')
-        #     # self._plot_test_set_distribution(figsize=[8, 5])
-		#
-        #     self.logger.info('\n****** Print classification report ******\n')
-        #     # self._plot_classification_report(figsize=[max(5,self.n_classes*0.5), max(8,self.n_classes*0.8)])
-		#
-        #     self.logger.info('\n****** Print confusion matrix (recall) ******\n')
-        #     # self._plot_confusion_matrix(figsize=[max(9,self.n_classes*0.9), max(8,self.n_classes*0.9)])
-		#
-        #     self.logger.info('\n****** Print confusion matrix (precision) ******\n')
-        #     # self._plot_confusion_matrix(figsize=[max(9,self.n_classes*0.9), max(8,self.n_classes*0.9)], precision=True)
+        else:
+            self.logger.info('\n****** Make prediction on test set ******\n')
+            self._make_prediction_on_test_set()
+
+            self.logger.info('\n****** Print distribution on test set ******\n')
+            self._print_test_set_distribution()
+
+            self.logger.info('\n****** Print classification report ******\n')
+            self._print_classification_report()
+
+            self.logger.info('\n****** Print confusion matrix (recall) ******\n')
+            self._print_confusion_matrix()
+
+            self.logger.info('\n****** Print confusion matrix (precision) ******\n')
+            self._print_confusion_matrix(precision=True)
