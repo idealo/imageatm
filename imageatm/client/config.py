@@ -151,7 +151,7 @@ def update_config(
     if base_model_name is not None:
         config.train['base_model_name'] = base_model_name
 
-    if create_report is not None:
+    if create_report is True:
         config.evaluate['report']['create'] = create_report
 
     if kernel_name is not None:
