@@ -104,6 +104,15 @@ depends on the average number of samples per class (*n_per_class*):
 the learning rate patience to allow for two learning rate adjustments
 before stopping training.
 
+## Contribute
+We welcome all kinds of contributions. See the [Contribution](CONTRIBUTING.md) guide for more details.
+
+#### Bump version
+To bump up the version, use
+```
+bumpversion {part} setup.py
+```
+
 ## Cite this work
 Please cite Image ATM in your publications if this is useful for your research. Here is an example BibTeX entry:
 ```
