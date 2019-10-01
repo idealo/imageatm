@@ -136,12 +136,22 @@ train:
 
 evaluate:
   run: True
-  kernel_name: imageatm
-  report_html: True
-  report_pdf: True
+  report:
+    create: True
+    kernel_name: imageatm
+    export_html: True
+    export_pdf: True
 ```
 
-These configurations will run three components in a pipeline: data preparation, training, and evaluation.
+These configurations will run three components in a pipeline: data preparation, training and evaluation.
+In case you set ```create: True``` a jupyter notebook is created. Be sure to set a proper ```kernel_name```.
+If you don't have an IPython ernel available [create one](https://ipython.readthedocs.io/en/stable/install/kernel_install.html).
+
+In case you like to export report to html set ```export_html: True```.
+
+In case you like to export report to pdf set ```export_pdf: True```. This will be done via Latex.
+Be sure to have installed all required packages for Latex.
+
 
 Then run:
 ```
