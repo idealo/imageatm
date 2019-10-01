@@ -316,7 +316,10 @@ class Evaluation:
         max_length = len(max(self.classes, key=len))
         for i, c in enumerate(self.classes):
             label = c + ' ' * (max_length - len(c))
-            self.logger.info("{}\t{}". format(label, cm[i]))
+            line_output = "{}\t".format(label)
+            for x in cm[i].tolist():
+                line_output += "{0:.2f}\t".format(x)
+            self.logger.info(line_output)
 
     def _plot_correct_wrong_examples(self):
         """Plots correct and wrong examples for each label in test set."""
