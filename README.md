@@ -1,3 +1,18 @@
+# Engineering of AI – project ideas
+
+1.	Adapting the model for different datasets
+2.	Improving the data preprocessing step
+3.	Adding more data visualizations
+4.	Multiclass classification
+5.	Saving model history and log files
+6.	Improving the data augmentation (generating images)
+
+
+
+
+
+
+
 # Image ATM (Automated Tagging Machine)
 
 [![Build Status](https://travis-ci.org/idealo/imageatm.svg?branch=master)](https://travis-ci.org/idealo/imageatm)
