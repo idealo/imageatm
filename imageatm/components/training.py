@@ -10,7 +10,7 @@ from imageatm.handlers.data_generator import TrainDataGenerator, ValDataGenerato
 from imageatm.handlers.image_classifier import ImageClassifier
 
 
-tf.logging.set_verbosity(tf.logging.ERROR)
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 BATCH_SIZE = 64
 DROPOUT_RATE = 0.75
@@ -158,7 +158,7 @@ class Training:
         # tensorboard = TensorBoardBatch(log_dir=Path(job_dir).resolve() / 'logs')
 
         model_save_name = (
-            'model_' + self.base_model_name.lower() + '_{epoch:02d}_{val_acc:.3f}.hdf5'
+            'model_' + self.base_model_name.lower() + '_{epoch:02d}_{val_accuracy:.3f}.hdf5'
         )
         model_dir = self.job_dir / 'models'
         model_dir.mkdir(parents=True, exist_ok=True)
@@ -167,7 +167,7 @@ class Training:
         logging_models = LoggingModels(
             logger=self.logger,
             filepath=str(model_dir / model_save_name),
-            monitor='val_acc',
+            monitor='val_accuracy',
             verbose=1,
             save_best_only=True,
             save_weights_only=False,
@@ -179,7 +179,7 @@ class Training:
 
                 min_lr = self.learning_rate_dense / 10
                 reduce_lr = ReduceLROnPlateau(
-                    monitor='val_acc',
+                    monitor='val_accuracy',
                     factor=0.3162,
                     patience=self.patience_learning_rate,
                     min_lr=min_lr,
@@ -187,7 +187,7 @@ class Training:
                 )
 
                 early_stopping = EarlyStopping(
-                    monitor='val_acc',
+                    monitor='val_accuracy',
                     min_delta=0.002,
                     patience=self.patience_early_stopping,
                     verbose=1,
@@ -220,7 +220,7 @@ class Training:
 
                 min_lr = self.learning_rate_all / 10
                 reduce_lr = ReduceLROnPlateau(
-                    monitor='val_acc',
+                    monitor='val_accuracy',
                     factor=0.3162,
                     patience=self.patience_learning_rate,
                     min_lr=min_lr,
@@ -228,7 +228,7 @@ class Training:
                 )
 
                 early_stopping = EarlyStopping(
-                    monitor='val_acc',
+                    monitor='val_accuracy',
                     min_delta=0.002,
                     patience=self.patience_early_stopping,
                     verbose=1,
