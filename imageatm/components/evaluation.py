@@ -191,59 +191,8 @@ class Evaluation:
             label = c + ' ' * (max_length - len(c))
             self.logger.info("{}\t{}". format(label, y_values[i]))
 
-    def _plot_classification_report(self, figsize: (float, float) = [5, 8]):
-        """Plots classification report on prediction on test set."""
-        assert self.mode_ipython, 'Plotting is only possible when in ipython-mode'
-
-        if self.n_classes > MAX_N_CLASSES:
-            self.logger.info('\nPlotting only for max {} classes\n'.format(MAX_N_CLASSES))
-            return
-
-        self.accuracy = accuracy_score(y_true=self.y_true, y_pred=self.y_pred)
-        cr = classification_report(
-            y_true=self.y_true, y_pred=self.y_pred, target_names=self.classes, output_dict=True
-        )
-
-        metrics = ['precision', 'recall', 'f1-score']
-        categories = self.classes.copy()
-        categories.extend(['macro avg', 'weighted avg'])
-        plotMat = []
-        for c in categories:
-            plotMat.append(list(cr[c].values())[:3])
-
-        plotMatArray = np.asarray(plotMat)
-        x_tick_marks = np.arange(3)
-        y_tick_marks = np.arange(len(categories))
-        title = 'Accuracy on prediction test set: {}'.format(round(self.accuracy * 100, 2))
-
-        fig = plt.figure(figsize=figsize)
-        plt.rcParams["axes.grid"] = False
-        plt.imshow(plotMatArray, interpolation='nearest', cmap=plt.cm.Blues, vmin=0, vmax=1)
-        plt.colorbar()
-        plt.title(title, fontsize=self.fontsize_title)
-        plt.xlabel('Measures', fontsize=self.fontsize_label)
-        plt.ylabel('Classes', fontsize=self.fontsize_label)
-        plt.xticks(x_tick_marks, metrics, rotation=45, fontsize=self.fontsize_ticks)
-        plt.yticks(y_tick_marks, categories, fontsize=self.fontsize_ticks)
-
-        thresh = plotMatArray.max() / 2.0
-        for i, j in itertools.product(range(plotMatArray.shape[0]), range(plotMatArray.shape[1])):
-            plt.text(
-                j,
-                i,
-                '{:.2f}'.format(plotMatArray[i, j]),
-                horizontalalignment='center',
-                color='white' if plotMatArray[i, j] > thresh else 'black',
-                fontsize=self.fontsize_ticks,
-            )
-
-        plt.tight_layout()
-        plt.show()
-
     def _print_classification_report(self):
         """Prints classification for labels in test set."""
-        assert not self.mode_ipython, 'Printing is recommended when not in ipython-mode'
-
         cr = classification_report(
             y_true=self.y_true, y_pred=self.y_pred, target_names=self.classes, output_dict=True
         )
@@ -499,7 +448,8 @@ class Evaluation:
             self._plot_test_set_distribution(figsize=[8, 5])
 
             self.logger.info('\n****** Plot classification report ******\n')
-            self._plot_classification_report(figsize=[4 + self.n_classes*0.5, 4 + self.n_classes*0.5])
+            # self._plot_classification_report(figsize=[4 + self.n_classes*0.5, 4 + self.n_classes*0.5])
+            self._print_classification_report()
 
             self.logger.info('\n****** Plot confusion matrix (recall) ******\n')
             self._plot_confusion_matrix(figsize=[4 + self.n_classes*0.5, 4 + self.n_classes*0.5])

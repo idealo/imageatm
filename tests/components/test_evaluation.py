@@ -62,7 +62,7 @@ class TestEvaluation(object):
             'imageatm.components.evaluation.Evaluation._plot_test_set_distribution'
         )
         mp_calc_cr = mocker.patch(
-            'imageatm.components.evaluation.Evaluation._plot_classification_report'
+            'imageatm.components.evaluation.Evaluation._print_classification_report'
         )
         mp_plot_cm = mocker.patch(
             'imageatm.components.evaluation.Evaluation._plot_confusion_matrix'
