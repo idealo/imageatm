@@ -12,7 +12,7 @@ TEST_BATCH_SIZE = 16
 TEST_BASE_MODEL_NAME = 'MobileNet'
 
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope='class', autouse=True)
 def tear_down(request):
     def remove_evaluation_dir():
         shutil.rmtree(TEST_JOB_DIR / 'evaluation_model_mobilenet_15_0.375')
@@ -102,10 +102,10 @@ class TestEvaluation(object):
         eval._plot_test_set_distribution()
 
         mock_plt_bar.assert_called()
-        mock_plt_xlabel.assert_called_with('Label', fontsize=12)
-        mock_plt_ylabel.assert_called_with('Number of images', fontsize=12)
+        mock_plt_xlabel.assert_called_with('Label', fontsize=14)
+        mock_plt_ylabel.assert_called_with('Number of images', fontsize=14)
         mock_plt_xticks.assert_called()
-        mock_plt_title.assert_called_with('Number of images in test set: 4', fontsize=16)
+        mock_plt_title.assert_called_with('Number of images in test set: 4', fontsize=18)
         mock_plt_show.assert_called()
 
     def test__plot_confusion_matrix(self, mocker):
@@ -127,12 +127,12 @@ class TestEvaluation(object):
 
         mock_plt_figure.assert_called()
         mock_plt_imshow.assert_called()
-        mock_plt_title.assert_called_with('Confusion matrix (recall)', fontsize=16)
+        mock_plt_title.assert_called_with('Confusion matrix (recall)', fontsize=18)
         mock_plt_colorbar.assert_called()
         mock_plt_xticks.assert_called()
         mock_plt_yticks.assert_called()
-        mock_plt_xlabel.assert_called_with('Predicted label', fontsize=12)
-        mock_plt_ylabel.assert_called_with('True label', fontsize=12)
+        mock_plt_xlabel.assert_called_with('Predicted label', fontsize=14)
+        mock_plt_ylabel.assert_called_with('True label', fontsize=14)
         mock_plt_tight_layout.assert_called()
         mock_plt_show.assert_called()
 

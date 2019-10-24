@@ -1,4 +1,5 @@
 import pytest
+import shutil
 from pathlib import Path
 from imageatm.components.training import Training
 from imageatm.handlers.data_generator import TrainDataGenerator, ValDataGenerator
@@ -26,6 +27,12 @@ def common_patches(mocker):
     TrainDataGenerator.__init__.return_value = None
     ValDataGenerator.__init__.return_value = None
 
+@pytest.fixture(scope='class', autouse=True)
+def tear_down(request):
+    def remove_logs():
+        (TEST_JOB_DIR / 'logs').unlink()
+
+    request.addfinalizer(remove_logs)
 
 class TestTraining(object):
     train = None

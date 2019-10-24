@@ -20,10 +20,11 @@ TEST_IMAGE_DIR_RES = Path('tests/data/test_images_resized')
 TEST_JOB_DIR = Path('tests/data/test_arg_flow')
 
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope='class', autouse=True)
 def tear_down(request):
     def remove_job_dir():
         shutil.rmtree(TEST_JOB_DIR)
+        shutil.rmtree(TEST_IMAGE_DIR_RES)
 
     request.addfinalizer(remove_job_dir)
 

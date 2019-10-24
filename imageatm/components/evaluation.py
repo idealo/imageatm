@@ -78,9 +78,9 @@ class Evaluation:
 
         Plots will only be shown if in ipython, otherwise saved as files.
         """
-        self.fontsize_title = 16 if self.n_classes < 4 else 18
-        self.fontsize_label = 12 if self.n_classes < 4 else 14
-        self.fontsize_ticks = 9 if self.n_classes < 4 else 12
+        self.fontsize_title = 18 if self.n_classes < 4 else 18
+        self.fontsize_label = 14 if self.n_classes < 4 else 14
+        self.fontsize_ticks = 12 if self.n_classes < 4 else 12
         self.mode_ipython = True if self._is_in_ipython_mode() else False
 
     def _is_in_ipython_mode(self):
@@ -288,7 +288,7 @@ class Evaluation:
         plt.title(title, fontsize=self.fontsize_title)
         plt.xlabel(xlabel, fontsize=self.fontsize_label)
         plt.ylabel(ylabel, fontsize=self.fontsize_label)
-        plt.xticks(tick_marks, self.classes, rotation=45, fontsize=self.fontsize_ticks)
+        plt.xticks(tick_marks, self.classes, rotation=45, fontsize=self.fontsize_ticks, ha='right')
         plt.yticks(tick_marks, self.classes, fontsize=self.fontsize_ticks)
 
         thresh = cm.max() / 2.0
@@ -499,13 +499,13 @@ class Evaluation:
             self._plot_test_set_distribution(figsize=[8, 5])
 
             self.logger.info('\n****** Plot classification report ******\n')
-            self._plot_classification_report(figsize=[max(5,self.n_classes*0.5), max(8,self.n_classes*0.8)])
+            self._plot_classification_report(figsize=[4 + self.n_classes*0.5, 4 + self.n_classes*0.5])
 
             self.logger.info('\n****** Plot confusion matrix (recall) ******\n')
-            self._plot_confusion_matrix(figsize=[max(9,self.n_classes*0.9), max(8,self.n_classes*0.9)])
+            self._plot_confusion_matrix(figsize=[4 + self.n_classes*0.5, 4 + self.n_classes*0.5])
 
             self.logger.info('\n****** Plot confusion matrix (precision) ******\n')
-            self._plot_confusion_matrix(figsize=[max(9,self.n_classes*0.9), max(8,self.n_classes*0.9)], precision=True)
+            self._plot_confusion_matrix(figsize=[4 + self.n_classes*0.5, 4 + self.n_classes*0.5], precision=True)
 
             self.logger.info('\n****** Plot correct and wrong examples ******\n')
             self._plot_correct_wrong_examples()

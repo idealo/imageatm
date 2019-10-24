@@ -13,7 +13,7 @@ TEST_CONFIG_FILE = p.resolve().parent / 'test_configs' / 'config_train.yml'
 TEST_JOB_DIR = 'test_dataprep'
 
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope='module', autouse=True)
 def tear_down(request):
     def remove_job_dir():
         shutil.rmtree(TEST_JOB_DIR)
