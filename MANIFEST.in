@@ -1,0 +1,2 @@
+include imageatm/notebooks/evaluation_template.ipynb
+include imageatm/notebooks/tex_templates/evaluation_report.tplx

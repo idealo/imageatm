@@ -23,13 +23,14 @@ setup(
     long_description=long_description,
     license='Apache 2.0',
     install_requires=[
-        'Keras>=2.2.4',
+        'Keras==2.2.4',
         'keras-vis>=0.4.1',
         'tensorflow==1.13.1',
         'awscli',
         'Click',
         'h5py',
         'matplotlib',
+        'papermill',
         'Pillow',
         'scikit-learn',
         'scipy==1.1.*',
@@ -54,4 +55,5 @@ setup(
     ],
     packages=find_packages(exclude=('tests',)),
     entry_points={'console_scripts': ['imageatm=imageatm.client.client:cli']},
+    include_package_data=True,
 )

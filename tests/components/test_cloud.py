@@ -14,14 +14,12 @@ TEST_CLOUD_TAG = 'test_cloud_tag'
 TEST_IMG_DIR = Path('./tests/data/test_images').resolve()
 
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope='class', autouse=True)
 def tear_down(request):
-    def remove_log_file():
-        p = Path('./tests/data/test_train_job/logs').resolve()
-        if p.exists():
-            p.unlink()
+    def remove_logs():
+        (TEST_JOB_DIR / 'logs').unlink()
 
-    request.addfinalizer(remove_log_file)
+    request.addfinalizer(remove_logs)
 
 
 class TestAWS(object):

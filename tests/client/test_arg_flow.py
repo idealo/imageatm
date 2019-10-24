@@ -3,13 +3,16 @@ import shutil
 from pathlib import Path
 from imageatm.client.client import Config
 from imageatm.client.commands import pipeline, train, evaluate, dataprep
-
+from imageatm.components.evaluation import Evaluation
+from os.path import dirname
+import imageatm.notebooks
 
 p = Path(__file__)
 TEST_CONFIG_PIPE = p.resolve().parent / 'test_configs' / 'config_arg_flow_all.yml'
 TEST_CONFIG_DATAPREP = p.resolve().parent / 'test_configs' / 'config_arg_flow_dataprep.yml'
 TEST_CONFIG_TRAIN = p.resolve().parent / 'test_configs' / 'config_arg_flow_train.yml'
 TEST_CONFIG_EVAL = p.resolve().parent / 'test_configs' / 'config_arg_flow_eval.yml'
+TEST_NB_TEMPLATE = p.resolve().parent / 'test_notebooks' / 'evaluation_template.ipynb'
 
 TEST_SAMPLES = Path('tests/data/test_samples/test_arg_flow.json')
 TEST_IMAGE_DIR = Path('tests/data/test_images')
@@ -17,10 +20,11 @@ TEST_IMAGE_DIR_RES = Path('tests/data/test_images_resized')
 TEST_JOB_DIR = Path('tests/data/test_arg_flow')
 
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope='class', autouse=True)
 def tear_down(request):
     def remove_job_dir():
         shutil.rmtree(TEST_JOB_DIR)
+        shutil.rmtree(TEST_IMAGE_DIR_RES)
 
     request.addfinalizer(remove_job_dir)
 
@@ -71,11 +75,19 @@ class TestArgFlow(object):
 
         assert list(Path(TEST_JOB_DIR / 'models').glob('*.hdf5'))
 
-    def test_evaluate(self):
-        config = Config()
+    def test_evaluate(self, mocker):
+        def fake_execute_notebook(*args, **kwargs):
+            filepath_template = TEST_NB_TEMPLATE
+            filepath_notebook = TEST_JOB_DIR / 'evaluation_model_mobilenet_01_0.500/evaluation_report.ipynb'
+            shutil.copy(filepath_template, filepath_notebook)
 
-        assert not list(TEST_JOB_DIR.glob('*/confusion_matrix.pdf'))
-        assert not list(TEST_JOB_DIR.glob('*/test_set_distribution.pdf'))
+        mocker.patch('papermill.execute_notebook', side_effect=fake_execute_notebook)
+        mocker.patch('imageatm.components.evaluation.Evaluation._determine_best_modelfile',
+                     return_value=TEST_JOB_DIR / 'models/model_mobilenet_01_0.500.hdf5')
+        mocker.patch('nbconvert.PDFExporter.from_notebook_node',
+                     return_value=('ANY_DATA'.encode(), None))
+
+        config = Config()
 
         evaluate(config, config_file=TEST_CONFIG_EVAL)
 
@@ -86,10 +98,20 @@ class TestArgFlow(object):
         assert config.evaluate['run'] == True
         assert config.evaluate['job_dir'] == str(TEST_JOB_DIR)
         assert config.evaluate['image_dir'] == str(TEST_IMAGE_DIR_RES)
-        assert list(TEST_JOB_DIR.glob('*/confusion_matrix.pdf'))
-        assert list(TEST_JOB_DIR.glob('*/test_set_distribution.pdf'))
 
-    def test_pipeline(self):
+    def test_pipeline(self, mocker):
+
+        def fake_execute_notebook(*args, **kwargs):
+            filepath_template = TEST_NB_TEMPLATE
+            filepath_notebook = TEST_JOB_DIR / 'evaluation_model_mobilenet_01_0.500/evaluation_report.ipynb'
+            shutil.copy(filepath_template, filepath_notebook)
+
+        mocker.patch('papermill.execute_notebook', side_effect=fake_execute_notebook)
+        mocker.patch('imageatm.components.evaluation.Evaluation._determine_best_modelfile',
+                     return_value=TEST_JOB_DIR / 'models/model_mobilenet_01_0.500.hdf5')
+        mocker.patch('nbconvert.PDFExporter.from_notebook_node',
+                     return_value=('ANY_DATA'.encode(), None))
+
         config = Config()
 
         pipeline(config, config_file=TEST_CONFIG_PIPE)
@@ -104,6 +126,10 @@ class TestArgFlow(object):
         assert config.train['cloud'] == False
 
         assert config.evaluate['run'] == True
+        assert config.evaluate['report']['create'] == True
+        assert config.evaluate['report']['kernel_name'] == 'any_kernel'
+        assert config.evaluate['report']['export_html'] == True
+        assert config.evaluate['report']['export_pdf'] == True
 
         assert config.cloud['run'] == False
         assert config.cloud['provider'] == 'aws'
@@ -115,6 +141,4 @@ class TestArgFlow(object):
         assert config.cloud['destroy'] == True
         assert config.cloud['cloud_tag'] == 'test_user'
 
-        assert list(TEST_JOB_DIR.glob('*/confusion_matrix.pdf'))
-        assert list(TEST_JOB_DIR.glob('*/test_set_distribution.pdf'))
         assert list(Path(TEST_JOB_DIR / 'models').glob('*.hdf5'))

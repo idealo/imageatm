@@ -12,7 +12,7 @@ TEST_BATCH_SIZE = 16
 TEST_BASE_MODEL_NAME = 'MobileNet'
 
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope='class', autouse=True)
 def tear_down(request):
     def remove_evaluation_dir():
         shutil.rmtree(TEST_JOB_DIR / 'evaluation_model_mobilenet_15_0.375')
@@ -55,26 +55,31 @@ class TestEvaluation(object):
         assert eval.y_true[3] == 1
 
     def test_run(self, mocker):
-        mp_plot_dist = mocker.patch(
-            'imageatm.components.evaluation.Evaluation._plot_test_set_distribution'
-        )
         mp_make_pred = mocker.patch(
             'imageatm.components.evaluation.Evaluation._make_prediction_on_test_set'
         )
+        mp_plot_dist = mocker.patch(
+            'imageatm.components.evaluation.Evaluation._plot_test_set_distribution'
+        )
         mp_calc_cr = mocker.patch(
-            'imageatm.components.evaluation.Evaluation._calc_classification_report'
+            'imageatm.components.evaluation.Evaluation._print_classification_report'
         )
         mp_plot_cm = mocker.patch(
             'imageatm.components.evaluation.Evaluation._plot_confusion_matrix'
         )
+        mp_plot_cw = mocker.patch(
+            'imageatm.components.evaluation.Evaluation._plot_correct_wrong_examples'
+        )
 
         global eval
+        eval.mode_ipython = True
         eval.run()
 
-        mp_plot_dist.assert_called()
         mp_make_pred.assert_called()
+        mp_plot_dist.assert_called()
         mp_calc_cr.assert_called()
         mp_plot_cm.assert_called()
+        mp_plot_cw.assert_called()
 
     def test__load_best_model(self, mocker):
         mp = mocker.patch('imageatm.components.evaluation.load_model')
@@ -93,13 +98,14 @@ class TestEvaluation(object):
         mock_plt_show = mocker.patch('matplotlib.pyplot.show')
 
         global eval
+        eval.mode_ipython = True
         eval._plot_test_set_distribution()
 
         mock_plt_bar.assert_called()
-        mock_plt_xlabel.assert_called_with('Label', fontsize=12)
-        mock_plt_ylabel.assert_called_with('Number of images', fontsize=12)
+        mock_plt_xlabel.assert_called_with('Label', fontsize=14)
+        mock_plt_ylabel.assert_called_with('Number of images', fontsize=14)
         mock_plt_xticks.assert_called()
-        mock_plt_title.assert_called_with('Number of images in test set: 4', fontsize=16)
+        mock_plt_title.assert_called_with('Number of images in test set: 4', fontsize=18)
         mock_plt_show.assert_called()
 
     def test__plot_confusion_matrix(self, mocker):
@@ -115,17 +121,18 @@ class TestEvaluation(object):
         mock_plt_show = mocker.patch('matplotlib.pyplot.show')
 
         global eval
+        eval.mode_ipython = True
         eval.y_pred = [1, 0, 0, 0]
         eval._plot_confusion_matrix()
 
         mock_plt_figure.assert_called()
         mock_plt_imshow.assert_called()
-        mock_plt_title.assert_called_with('Confusion matrix', fontsize=16)
+        mock_plt_title.assert_called_with('Confusion matrix (recall)', fontsize=18)
         mock_plt_colorbar.assert_called()
         mock_plt_xticks.assert_called()
         mock_plt_yticks.assert_called()
-        mock_plt_xlabel.assert_called_with('Predicted label', fontsize=12)
-        mock_plt_ylabel.assert_called_with('True label', fontsize=12)
+        mock_plt_xlabel.assert_called_with('Predicted label', fontsize=14)
+        mock_plt_ylabel.assert_called_with('True label', fontsize=14)
         mock_plt_tight_layout.assert_called()
         mock_plt_show.assert_called()
 
@@ -175,24 +182,6 @@ class TestEvaluation(object):
         npt.assert_array_equal(eval.y_pred, [1, 0, 0])
         mp_proba.assert_called_with(predictions_dist=[[0.3, 0.85], [0.7, 0.2], [0.5, 0.3]])
 
-    def test__calc_classification_report(self, mocker):
-        mp_cr = mocker.patch('imageatm.components.evaluation.classification_report')
-
-        global eval
-
-        eval.y_pred = [0, 1, 1, 0]
-        eval.y_true = [1, 1, 1, 0]
-        eval.classes = ['0', '1']
-        eval._calc_classification_report()
-        assert eval.accuracy == 0.75
-        mp_cr.assert_called_with(y_true=eval.y_true, y_pred=eval.y_pred, target_names=eval.classes)
-
-        eval.y_pred = [0, 1, 1, 0]
-        eval.y_true = [1, 1, 1, 1]
-
-        eval._calc_classification_report()
-        assert eval.accuracy != 0.75
-
     def test_visualize_images_empty_image_list(self, mocker):
         mock_plt_title = mocker.patch('matplotlib.pyplot.title')
         mock_plt_figure = mocker.patch('matplotlib.pyplot.figure')
@@ -203,6 +192,8 @@ class TestEvaluation(object):
         mock_plt_savefig = mocker.patch('matplotlib.pyplot.savefig')
 
         global eval
+        eval.mode_ipython = True
+
         assert eval.visualize_images(image_list=[]) is None
         mock_plt_title.assert_not_called()
         mock_plt_figure.assert_not_called()
@@ -222,8 +213,7 @@ class TestEvaluation(object):
         mock_plt_show = mocker.patch('matplotlib.pyplot.show')
 
         global eval
-        eval.save_plots = False
-        eval.show_plots = True
+        eval.mode_ipython = True
         eval.class_mapping = {'0': 0, '1': 1}
         eval.y_true = [0, 0, 0, 1]
         eval.y_pred = [1, 0, 0, 0]
@@ -249,8 +239,7 @@ class TestEvaluation(object):
         mock_plt_show = mocker.patch('matplotlib.pyplot.show')
 
         global eval
-        eval.save_plots = True
-        eval.show_plots = False
+        eval.mode_ipython = True
         correct, wrong = eval.get_correct_wrong_examples(0)
 
         eval.visualize_images(correct, show_heatmap=False)
@@ -259,8 +248,8 @@ class TestEvaluation(object):
         mock_plt_imshow.call_count == 3
         mock_plt_subplot.call_count == 3
         mock_plt_axis.call_count == 3
-        mock_plt_savefig.assert_called_once()
-        mock_plt_show.assert_not_called()
+        mock_plt_savefig.assert_not_called()
+        mock_plt_show.assert_called_once()
 
     def test_visualize_images_3(self, mocker):
         mock_plt_title = mocker.patch('matplotlib.pyplot.title')
@@ -274,8 +263,7 @@ class TestEvaluation(object):
         mocker.patch('imageatm.handlers.image_classifier.ImageClassifier.get_preprocess_input')
 
         global eval
-        eval.save_plots = True
-        eval.show_plots = False
+        eval.mode_ipython = True
         correct, wrong = eval.get_correct_wrong_examples(0)
 
         eval.visualize_images(correct, show_heatmap=True)
@@ -285,5 +273,5 @@ class TestEvaluation(object):
         mock_plt_imshow.call_count == 9
         mock_plt_subplot.call_count == 3
         mock_plt_axis.call_count == 6
-        mock_plt_savefig.assert_called_once()
-        mock_plt_show.assert_not_called()
+        mock_plt_savefig.assert_not_called()
+        mock_plt_show.assert_called_once()
