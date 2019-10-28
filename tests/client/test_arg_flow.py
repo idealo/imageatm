@@ -3,9 +3,6 @@ import shutil
 from pathlib import Path
 from imageatm.client.client import Config
 from imageatm.client.commands import pipeline, train, evaluate, dataprep
-from imageatm.components.evaluation import Evaluation
-from os.path import dirname
-import imageatm.notebooks
 
 p = Path(__file__)
 TEST_CONFIG_PIPE = p.resolve().parent / 'test_configs' / 'config_arg_flow_all.yml'
@@ -76,14 +73,17 @@ class TestArgFlow(object):
         assert list(Path(TEST_JOB_DIR / 'models').glob('*.hdf5'))
 
     def test_evaluate(self, mocker):
+
+        BEST_MODEL_FILE = list(Path(TEST_JOB_DIR / 'models').glob('*.hdf5'))[-1]
+        BEST_MODEL = 'evaluation_' + BEST_MODEL_FILE.stem
+        NB_FILEPATH = TEST_JOB_DIR / BEST_MODEL / 'evaluation_report.ipynb'
+
         def fake_execute_notebook(*args, **kwargs):
-            filepath_template = TEST_NB_TEMPLATE
-            filepath_notebook = TEST_JOB_DIR / 'evaluation_model_mobilenet_01_0.500/evaluation_report.ipynb'
-            shutil.copy(filepath_template, filepath_notebook)
+            shutil.copy(TEST_NB_TEMPLATE, NB_FILEPATH)
 
         mocker.patch('papermill.execute_notebook', side_effect=fake_execute_notebook)
         mocker.patch('imageatm.components.evaluation.Evaluation._determine_best_modelfile',
-                     return_value=TEST_JOB_DIR / 'models/model_mobilenet_01_0.500.hdf5')
+                     return_value=BEST_MODEL_FILE)
         mocker.patch('nbconvert.PDFExporter.from_notebook_node',
                      return_value=('ANY_DATA'.encode(), None))
 
@@ -101,14 +101,16 @@ class TestArgFlow(object):
 
     def test_pipeline(self, mocker):
 
+        BEST_MODEL_FILE = list(Path(TEST_JOB_DIR / 'models').glob('*.hdf5'))[-1]
+        BEST_MODEL = 'evaluation_' + BEST_MODEL_FILE.stem
+        NB_FILEPATH = TEST_JOB_DIR / BEST_MODEL / 'evaluation_report.ipynb'
+
         def fake_execute_notebook(*args, **kwargs):
-            filepath_template = TEST_NB_TEMPLATE
-            filepath_notebook = TEST_JOB_DIR / 'evaluation_model_mobilenet_01_0.500/evaluation_report.ipynb'
-            shutil.copy(filepath_template, filepath_notebook)
+            shutil.copy(TEST_NB_TEMPLATE, NB_FILEPATH)
 
         mocker.patch('papermill.execute_notebook', side_effect=fake_execute_notebook)
         mocker.patch('imageatm.components.evaluation.Evaluation._determine_best_modelfile',
-                     return_value=TEST_JOB_DIR / 'models/model_mobilenet_01_0.500.hdf5')
+                     return_value=BEST_MODEL_FILE)
         mocker.patch('nbconvert.PDFExporter.from_notebook_node',
                      return_value=('ANY_DATA'.encode(), None))
 
