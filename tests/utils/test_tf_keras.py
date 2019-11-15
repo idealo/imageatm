@@ -22,7 +22,7 @@ TEST_DIR = Path('tests/data/test_callbacks/').resolve()
 TEST_DIR.mkdir(parents=True, exist_ok=True)
 
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope='class', autouse=True)
 def tear_down(request):
     def remove_job_dir():
         shutil.rmtree(TEST_DIR)

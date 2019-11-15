@@ -12,6 +12,11 @@ train:
 
 evaluate:
   run: True
+  report:
+    create: True
+    kernel_name: any_kernel
+    export_html: True
+    export_pdf: False
 
 cloud:
   cloud_tag: image_atm_example_tag

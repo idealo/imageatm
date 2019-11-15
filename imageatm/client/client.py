@@ -50,6 +50,18 @@ def cli(config: Config):
     '--base-model-name', help='Pretrained CNN to be used for transfer learning.', required=False
 )
 @click.option(
+    '--create-report', is_flag=True, required=False, help='Create evaluation report via jupyter notebook.'
+)
+@click.option(
+    '--kernel-name',  required=False, help='Kernel-name for juypter notebook.'
+)
+@click.option(
+    '--export-html', is_flag=True, required=False, help='Export evaluation report to html.'
+)
+@click.option(
+    '--export-pdf', is_flag=True, required=False, help='Export evaluation report to pdf.'
+)
+@click.option(
     '--cloud-tag', help='Tag under which all cloud resources are created.', required=False
 )
 @pass_config
@@ -155,6 +167,18 @@ def train(config: Config, **kwargs):
 @click.option('--image-dir', type=click.Path(), help='Directory with image files.')
 @click.option(
     '--job-dir', type=click.Path(), help=('Directory with test samples files and trained model.')
+)
+@click.option(
+    '--create-report', is_flag=True, required=False, help='Create evaluation report via jupyter notebook.'
+)
+@click.option(
+    '--kernel-name',  required=False, help='Kernel-name for juypter notebook.'
+)
+@click.option(
+    '--export-html', is_flag=True, required=False, help='Export evaluation report to html.'
+)
+@click.option(
+    '--export-pdf', is_flag=True, required=False, help='Export evaluation report to pdf.'
 )
 @pass_config
 def evaluate(config: Config, **kwargs):

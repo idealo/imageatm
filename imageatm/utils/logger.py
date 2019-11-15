@@ -10,6 +10,7 @@ def get_logger(name: str, job_dir: Union[Path, str]) -> logging.Logger:
 
     logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
+    logger.handlers = []
 
     if not logger.handlers:
         # stream handler ensures that logging events are passed to stdout

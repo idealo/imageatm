@@ -32,7 +32,7 @@ TEST_STR_FILE_CORRUPTED = p.parent / '../data/test_samples' / 'test_str_labels_c
 TEST_JOB_DIR = p.parent / 'test_job_dir'
 
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope='class', autouse=True)
 def tear_down(request):
     def remove_job_dir():
         shutil.rmtree(TEST_JOB_DIR)
