@@ -124,7 +124,7 @@ class TestTfKeras(object):
 
         # case 3
         mode = 'max'
-        monitor = 'val_acc'
+        monitor = 'val_accuracy'
         cbks = [
             LoggingModels(
                 filepath,
