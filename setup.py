@@ -16,7 +16,7 @@ Image ATM is compatible with Python 3.6 and is distributed under the Apache 2.0 
 
 setup(
     name='imageatm',
-    version='0.1.0',
+    version='0.1.1',
     author='Christopher Lennan, Malgorzata Adamczyk, Gunar Maiwald, Dat Tran',
     author_email='christopherlennan@gmail.com, m.adamczyk.berlin@gmail.com, gunar.maiwald@web.de, datitran@gmail.com',
     description='Image classification for everyone',
