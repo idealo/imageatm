@@ -66,6 +66,13 @@ evaluator = Evaluation(image_dir=dp.image_dir, job_dir=dp.job_dir)
 evaluator.run()
 ```
 
+## Test
+Test execution is triggered by these commands:
+```
+pip install -e ".[tests, docs]"
+pytest -vs --cov=imageatm --show-capture=no --disable-pytest-warnings tests/
+```
+
 ## Transfer learning
 The following pretrained CNNs from Keras can be used for transfer learning in Image-ATM:
 
@@ -96,6 +103,15 @@ depends on the average number of samples per class (*n_per_class*):
 **Training is stopped early** after a patience period that is three times
 the learning rate patience to allow for two learning rate adjustments
 before stopping training.
+
+## Contribute
+We welcome all kinds of contributions. See the [Contribution](CONTRIBUTING.md) guide for more details.
+
+#### Bump version
+To bump up the version, use
+```
+bumpversion {part} setup.py
+```
 
 ## Cite this work
 Please cite Image ATM in your publications if this is useful for your research. Here is an example BibTeX entry:

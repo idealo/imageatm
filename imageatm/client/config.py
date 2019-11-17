@@ -47,6 +47,7 @@ def update_config(
     bucket: Optional[str] = None,
     tf_dir: Optional[Path] = None,
     train_cloud: Optional[bool] = None,
+    ## TODO: check if destroy == !no_destroy
     destroy: Optional[bool] = None,
     no_destroy: Optional[bool] = None,
     resize: Optional[bool] = None,
@@ -57,11 +58,21 @@ def update_config(
     epochs_train_all: Optional[int] = None,
     base_model_name: Optional[str] = None,
     cloud_tag: Optional[str] = None,
+    create_report: Optional[bool] = None,
+    kernel_name: Optional[str] = None,
+    export_html: Optional[bool] = None,
+    export_pdf: Optional[bool] = None,
 ) -> Config:
 
     # set defaults
     config.train['cloud'] = False
     config.dataprep['resize'] = False
+    config.evaluate['report'] = {
+        'create': False,
+        'kernel_name': 'imageatm',
+        'export_html': False,
+        'export_pdf': False
+    }
     config.pipeline = []
 
     # load central config file
@@ -140,6 +151,18 @@ def update_config(
     if base_model_name is not None:
         config.train['base_model_name'] = base_model_name
 
+    if create_report is True:
+        config.evaluate['report']['create'] = create_report
+
+    if kernel_name is not None:
+        config.evaluate['report']['kernel_name'] = kernel_name
+
+    if kernel_name is not None:
+        config.evaluate['report']['export_html'] = export_html
+
+    if kernel_name is not None:
+        config.evaluate['report']['export_pdf'] = export_pdf
+
     if cloud_tag is not None:
         config.cloud['cloud_tag'] = cloud_tag
 
@@ -193,10 +216,14 @@ def val_train(config: dict) -> List[str]:
 
 
 def val_evaluate(config: dict) -> List[str]:
-    required_keys = ['image_dir', 'job_dir', 'run']
+    required_keys = ['image_dir', 'job_dir', 'report', 'run']
     optional_keys: list = []
+    msg = get_diff('evaluate', config, required_keys, optional_keys)
 
-    return get_diff('evaluate', config, required_keys, optional_keys)
+    required_keys = ['create', 'kernel_name', 'export_pdf', 'export_html']
+    optional_keys: list = []
+    msg += get_diff('evaluate', config['report'], required_keys, optional_keys)
+    return msg
 
 
 def val_cloud(config: dict) -> List[str]:

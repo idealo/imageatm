@@ -16,20 +16,21 @@ Image ATM is compatible with Python 3.6 and is distributed under the Apache 2.0 
 
 setup(
     name='imageatm',
-    version='0.1.0',
+    version='0.1.1',
     author='Christopher Lennan, Malgorzata Adamczyk, Gunar Maiwald, Dat Tran',
     author_email='christopherlennan@gmail.com, m.adamczyk.berlin@gmail.com, gunar.maiwald@web.de, datitran@gmail.com',
     description='Image classification for everyone',
     long_description=long_description,
     license='Apache 2.0',
     install_requires=[
-        'Keras>=2.2.4',
+        'Keras==2.3.*',
         'keras-vis>=0.4.1',
-        'tensorflow==1.13.1',
+        'tensorflow==2.0.*',
         'awscli',
         'Click',
         'h5py',
         'matplotlib',
+        'papermill',
         'Pillow',
         'scikit-learn',
         'scipy==1.1.*',
@@ -39,6 +40,7 @@ setup(
     extras_require={
         'tests': ['pytest==4.3.0', 'pytest-cov==2.6.1', 'pytest-mock', 'mock', 'mypy'],
         'docs': ['mkdocs==1.0.4', 'mkdocs-material==4.0.2'],
+        'dev': ['bumpversion==0.5.3'],
     },
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -53,4 +55,5 @@ setup(
     ],
     packages=find_packages(exclude=('tests',)),
     entry_points={'console_scripts': ['imageatm=imageatm.client.client:cli']},
+    include_package_data=True,
 )
